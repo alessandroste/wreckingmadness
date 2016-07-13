@@ -1,14 +1,3 @@
-﻿  AppDelegate.cpp
-  Building.cpp
-  Common.cpp
-  Floor.cpp
-d:\sviluppo\wreckingmadness\classes\common.cpp(41): warning C4018: '<': errata corrispondenza tra signed e unsigned
-d:\sviluppo\wreckingmadness\classes\building.cpp(31): warning C4018: '<': errata corrispondenza tra signed e unsigned
-  GameScene.cpp
-  MainMenuScene.cpp
-  main.cpp
-d:\sviluppo\wreckingmadness\classes\gamescene.cpp(357): warning C4305: 'argomento': troncamento da 'double' a 'float'
-AppDelegate.obj : warning LNK4075: '/EDITANDCONTINUE' ignorato a causa della specifica di '/SAFESEH'
-     Creazione della libreria D:\Sviluppo\wreckingmadness\proj.win32\Debug.win32\WreckingMadness.lib e dell'oggetto D:\Sviluppo\wreckingmadness\proj.win32\Debug.win32\WreckingMadness.exp in corso...
+﻿  GameScene.cpp
   WreckingMadness.vcxproj -> D:\Sviluppo\wreckingmadness\proj.win32\Debug.win32\WreckingMadness.exe
   0 File copiati

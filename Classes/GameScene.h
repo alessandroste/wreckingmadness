@@ -54,7 +54,8 @@ class WreckingGame : public LayerColor
 		// game effects
 		void spanCloud(bool random);
 		void throwBall(int direction, bool stopped, float height);
-		void playCrashSound();
+		void finishThrow();
+		void playCrashSound(bool metal);
 
 	    // implement the "static create()" method manually
 	    CREATE_FUNC(WreckingGame);

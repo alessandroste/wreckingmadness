@@ -8,12 +8,12 @@
 USING_NS_CC;
 
 #define NUM_FLOORS 20
-#define VELOCITY 450
+#define VELOCITY 350
 #define SWIPE_FACTOR 0.03
 #define CLOUD_SPEED 20
 #define CLOUD_SPEED_OFFSET 10
 #define CLOUD_NUM 20
-#define BREAK_SPEED 3000
+#define BREAK_SPEED 2800
 
 Label * title;
 Vec2 origin;
@@ -23,6 +23,7 @@ bool throwing;
 float floor_width = 0;
 bool end;
 Common * gamecomm;
+float scale;
 
 // for Android NDK
 template <typename T>
@@ -55,6 +56,7 @@ bool WreckingGame::init(){
     size = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
 	float space = size.height * 5;
+	scale = Director::getInstance()->getContentScaleFactor();
 
 	// score
 	this->score = 0;
@@ -161,7 +163,8 @@ void WreckingGame::endGame() {
 	title->setPositionY(origin.y + size.height*0.8);
 	Director::getInstance()->getEventDispatcher()->removeAllEventListeners();
 	for (int i = 0; i < this->myBuilding->getNumber(); i++) {
-		//this->myBuilding->getUpperFloor()->getSprite()->removeFromParentAndCleanup(true);
+		// better leave the building where it is
+		// this->myBuilding->getUpperFloor()->getSprite()->removeFromParentAndCleanup(true);
 		this->myBuilding->removeFloor();
 	}
 	// menu
@@ -207,6 +210,7 @@ void WreckingGame::checkTouch(int num) {
 			if (this->myBuilding->getUpperFloor()->fl_type == "sx" || this->myBuilding->getUpperFloor()->fl_type == "both") {
 				this->updateTop("sx");
 			}
+			else this->throwBall(-1, true, this->myBuilding->getUpperFloor()->getSprite()->getPositionY());
 			isTouchDown = false;
 		}
 		else if (initialTouchPos[0] - currentTouchPos[0] < -size.width * SWIPE_FACTOR)
@@ -215,18 +219,19 @@ void WreckingGame::checkTouch(int num) {
 			if (this->myBuilding->getUpperFloor()->fl_type == "dx" || this->myBuilding->getUpperFloor()->fl_type == "both") {
 				this->updateTop("dx");
 			}
+			else this->throwBall(1, true, this->myBuilding->getUpperFloor()->getSprite()->getPositionY());
 			isTouchDown = false;
 		}
-		else if (initialTouchPos[1] - currentTouchPos[1] > size.width * SWIPE_FACTOR)
-		{
-			//CCLOG("SWIPED DOWN");
-			isTouchDown = false;
-		}
-		else if (initialTouchPos[1] - currentTouchPos[1] < -size.width * SWIPE_FACTOR)
-		{
-			//CCLOG("SWIPED UP");
-			isTouchDown = false;
-		}
+		//else if (initialTouchPos[1] - currentTouchPos[1] > size.width * SWIPE_FACTOR)
+		//{
+		//	//CCLOG("SWIPED DOWN");
+		//	isTouchDown = false;
+		//}
+		//else if (initialTouchPos[1] - currentTouchPos[1] < -size.width * SWIPE_FACTOR)
+		//{
+		//	//CCLOG("SWIPED UP");
+		//	isTouchDown = false;
+		//}
 	}
 }
 
@@ -266,7 +271,7 @@ void WreckingGame::menuCloseCallback(Ref* pSender)
 
 void WreckingGame::afterCaptured(bool succeed, const std::string & outputFile){
 	if (succeed) {
-		log(" screen shot %s", outputFile.c_str());
+		CCLOG(" screen shot %s", outputFile.c_str());
 	}
 }
 
@@ -274,8 +279,7 @@ void WreckingGame::shareScore(){
 	utils::captureScreen(CC_CALLBACK_2(WreckingGame::afterCaptured, this), "screen.png");
 }
 
-void WreckingGame::spanCloud(bool random)
-{
+void WreckingGame::spanCloud(bool random) {
 	Sprite * cloud = gamecomm->spanCloud();
 	float cloud_height = origin.y + ((float) rand() / (float) (RAND_MAX/size.height));
 	float cloud_vel = CLOUD_SPEED_OFFSET + (float)rand() / (float)(RAND_MAX / CLOUD_SPEED);
@@ -298,23 +302,36 @@ void WreckingGame::throwBall(int direction = 1, bool stopped = false, float heig
 		float xpos;
 		switch (direction) {
 		case -1:
-			xpos = origin.x + size.width + gamecomm->getBallRadius();
+			xpos = origin.x + size.width + gamecomm->getBallRadius()*scale;
 			break;
 		case 1:
-			xpos = origin.x - gamecomm->getBallRadius();
+			xpos = origin.x - gamecomm->getBallRadius()*scale;
 			break;
 		}
-		float ypos = height + gamecomm->getBallLength();
+		float ypos = height + gamecomm->getBallLength()*scale;
 		ball->setPosition(Vec2(xpos, ypos));
-		float space1 = size.width / 2 - floor_width/2;
-		ball->runAction(Sequence::create(MoveBy::create(space1 / BREAK_SPEED, Vec2(direction*space1, 0)),
-			CallFunc::create(CC_CALLBACK_0(WreckingGame::removeTop, this, direction)),
-			nullptr));
+		float space1 = size.width / 2 - floor_width/2 + gamecomm->getBallRadius()*scale;
+		if (!stopped) {
+			ball->runAction(Sequence::create(MoveBy::create(space1 / BREAK_SPEED, Vec2(direction*space1, 0)),
+				CallFunc::create(CC_CALLBACK_0(WreckingGame::removeTop, this, direction)),
+				nullptr));
+		} else {
+			ball->runAction(Sequence::create(MoveBy::create(0.05f, Vec2(direction*space1, 0)),
+				CallFunc::create(CC_CALLBACK_0(WreckingGame::playCrashSound, this, true)),
+				MoveBy::create(0.2f, Vec2(-direction*space1, 0)),
+				CallFunc::create(CC_CALLBACK_0(WreckingGame::finishThrow, this)),
+				nullptr));
+		}
 	}
 }
 
-void WreckingGame::playCrashSound(){
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
+void WreckingGame::finishThrow(){
+	throwing = false;
+}
+
+void WreckingGame::playCrashSound(bool metal = false){
+	if (!metal) CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
+	else CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("metal_hit.wav");
 }
  
 float WreckingGame::getTimeTick() {
@@ -347,16 +364,16 @@ void WreckingGame::generateFloor(bool roof, float correction){
 }
 
 void WreckingGame::removeTop(int dir){
-	throwing = false;
-	float space = size.width*2;
+	float space = size.width + floor_width;
 	this->myBuilding->getUpperFloor()->getSprite()->runAction(Sequence::create(
 		MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
 		RemoveSelf::create(),
 		nullptr));
 	ball->runAction(Sequence::create(
-		DelayTime::create(0.010),
-		CallFunc::create(CC_CALLBACK_0(WreckingGame::playCrashSound,this)),
+		DelayTime::create(0.01f),
+		CallFunc::create(CC_CALLBACK_0(WreckingGame::playCrashSound,this,false)),
 		MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
+		CallFunc::create(CC_CALLBACK_0(WreckingGame::finishThrow, this)),
 		nullptr));
 	this->myBuilding->removeFloor();
 	this->score++;

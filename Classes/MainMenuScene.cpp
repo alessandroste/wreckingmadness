@@ -90,6 +90,7 @@ bool TheMenu::init() {
 
 	// sounds
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("hit.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("metal_hit.wav");
 	CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("wreckingsound.wav",1);
 
 	#ifdef SDKBOX_ENABLED
