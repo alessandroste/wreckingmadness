@@ -1,0 +1,38 @@
+{
+    "android": {
+        "AdMob": {
+            "testdevice": "FE20924C46522E2E204587EB339897C6,kGADSimulatorID", 
+            "test": false, 
+            "cache": {
+                "gameover": true,
+            }, 
+            "ads": {
+                "gameover": {
+                    "width": 0, 
+                    "type": "banner", 
+                    "id": "ca-app-pub-5982841410553202/5078802412", 
+                    "alignment": "bottom", 
+                    "height": 0,
+                }
+            }
+        }
+    }, 
+    "ios": {
+        "AdMob": {
+            "testdevice": "kGADSimulatorID", 
+            "test": false, 
+            "cache": {
+                "gameover": true
+            }, 
+            "ads": {
+                "gameover": {
+                    "width": 0, 
+                    "type": "banner", 
+                    "id": "ca-app-pub-5982841410553202/5857531611", 
+                    "alignment": "bottom", 
+                    "height": 0
+                }
+            }
+        }
+    }
+}
