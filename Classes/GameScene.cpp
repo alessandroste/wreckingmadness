@@ -239,8 +239,7 @@ void WreckingGame::update(float dt) {
 	int num = this->myBuilding->getNumber();
 	if (num != 0) {
 		float upper_position = this->myBuilding->getUpperFloor()->getSprite()->getPositionY();
-		float fl_height = this->myBuilding->getUpperFloor()->getSprite()->getContentSize().height*
-			this->myBuilding->getUpperFloor()->getSprite()->getScale();
+		float fl_height = this->myBuilding->getUpperFloor()->getSprite()->getContentSize().height*scale;
 		if (upper_position > size.height - fl_height/2) {
 			// player loses game
 			end = true;
@@ -308,15 +307,17 @@ void WreckingGame::throwBall(int direction = 1, bool stopped = false, float heig
 			xpos = origin.x - gamecomm->getBallRadius()*scale;
 			break;
 		}
-		float ypos = height + gamecomm->getBallLength()*scale;
+		float ypos = height + gamecomm->getBallLength();
 		ball->setPosition(Vec2(xpos, ypos));
 		float space1 = size.width / 2 - floor_width/2 + gamecomm->getBallRadius()*scale;
 		if (!stopped) {
-			ball->runAction(Sequence::create(MoveBy::create(space1 / BREAK_SPEED, Vec2(direction*space1, 0)),
+			ball->runAction(Sequence::create(
+				MoveBy::create(space1 / BREAK_SPEED, Vec2(direction*space1, 0)),
 				CallFunc::create(CC_CALLBACK_0(WreckingGame::removeTop, this, direction)),
 				nullptr));
 		} else {
-			ball->runAction(Sequence::create(MoveBy::create(0.05f, Vec2(direction*space1, 0)),
+			ball->runAction(Sequence::create(
+				MoveBy::create(0.05f, Vec2(direction*space1, 0)),
 				CallFunc::create(CC_CALLBACK_0(WreckingGame::playCrashSound, this, true)),
 				MoveBy::create(0.2f, Vec2(-direction*space1, 0)),
 				CallFunc::create(CC_CALLBACK_0(WreckingGame::finishThrow, this)),
@@ -330,8 +331,10 @@ void WreckingGame::finishThrow(){
 }
 
 void WreckingGame::playCrashSound(bool metal = false){
-	if (!metal) CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
-	else CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("metal_hit.wav");
+	if (!metal) 
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
+	else 
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("metal_hit.wav");
 }
  
 float WreckingGame::getTimeTick() {
