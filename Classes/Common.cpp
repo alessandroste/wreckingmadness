@@ -45,7 +45,7 @@ void Common::setTopLocalScore(unsigned int score) {
 }
 
 Node * Common::getEndGameMenu(int score, int top_score){
-	
+	float off = 15;
 	Color4F color(172 / 255.0, 192 / 255.0, 193 / 255.0, 1);
 	Color4F lightcolor(180 / 255.0, 198 / 255.0, 199 / 255.0, 1);
 	Color4B darkcolor(116, 139, 139, 1);
@@ -58,8 +58,8 @@ Node * Common::getEndGameMenu(int score, int top_score){
 	// drawing rectangle background
 	DrawNode * rectNode = DrawNode::create();
 	Vec2 rectangle[4];
-	rectangle[0] = Vec2(-screensize.width/FILL, -screensize.height/FILL);
-	rectangle[1] = Vec2(screensize.width/FILL, -screensize.height/FILL);
+	rectangle[0] = Vec2(-screensize.width/FILL, -screensize.height/FILL + off);
+	rectangle[1] = Vec2(screensize.width/FILL, -screensize.height/FILL + off);
 	rectangle[2] = Vec2(screensize.width/FILL, screensize.height/FILL);
 	rectangle[3] = Vec2(-screensize.width/FILL, screensize.height/FILL);
 	rectNode->drawPolygon(rectangle, 4, color, 1, lightcolor);
@@ -85,7 +85,7 @@ Node * Common::getEndGameMenu(int score, int top_score){
 		Vec2(-stripewidth * 2.8 - stripedist*2, 0)
 	};
 	stripes->drawPolygon(stripe2, 4, lightcolor, 0, Color4F::BLACK);
-	stripes->setPosition(origin + Vec2(screensize.width * (1 / FILL + 1.0 / 2), screensize.height * (-1 / FILL + 1.0 / 2)));
+	stripes->setPosition(origin + Vec2(screensize.width * (1 / FILL + 1.0 / 2),off + screensize.height * (-1 / FILL + 1.0 / 2)));
 	menu->addChild(stripes);
 
 	// drawing bolts
@@ -100,14 +100,14 @@ Node * Common::getEndGameMenu(int score, int top_score){
 	bolt4->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltcolor);
 	bolt1->setPosition(origin + Vec2(screensize.width * (1 / FILL + 1.0 / 2) - boltradius*FILL, screensize.height * (1 / FILL + 1.0 / 2) - boltradius*FILL));
 	bolt2->setPosition(origin + Vec2(screensize.width * (-1 / FILL + 1.0 / 2) + boltradius*FILL, screensize.height * (1 / FILL + 1.0 / 2) - boltradius*FILL));
-	bolt3->setPosition(origin + Vec2(screensize.width * (1 / FILL + 1.0 / 2) - boltradius*FILL, screensize.height * (-1 / FILL + 1.0 / 2) + boltradius*FILL));
-	bolt4->setPosition(origin + Vec2(screensize.width * (-1 / FILL + 1.0 / 2) + boltradius*FILL, screensize.height * (-1 / FILL + 1.0 / 2) + boltradius*FILL));
+	bolt3->setPosition(origin + Vec2(screensize.width * (1 / FILL + 1.0 / 2) - boltradius*FILL, off + screensize.height * (-1 / FILL + 1.0 / 2) + boltradius*FILL));
+	bolt4->setPosition(origin + Vec2(screensize.width * (-1 / FILL + 1.0 / 2) + boltradius*FILL, off + screensize.height * (-1 / FILL + 1.0 / 2) + boltradius*FILL));
 	menu->addChild(bolt1);
 	menu->addChild(bolt2);
 	menu->addChild(bolt3);
 	menu->addChild(bolt4);
 	Label * engrave = Label::createWithTTF("wrecking madness", text_font, 12);
-	engrave->setPosition(origin + Vec2(screensize.width/2, screensize.height * (-1 / FILL + 1.0 / 2) + boltradius*FILL));
+	engrave->setPosition(origin + Vec2(screensize.width/2,off + screensize.height * (-1 / FILL + 1.0 / 2) + boltradius*FILL));
 	engrave->setTextColor(boltcolorB);
 	menu->addChild(engrave);
 
@@ -264,6 +264,7 @@ Common::Common(unsigned int chain_length){
 }
 
 Common::~Common(){
+
 }
 
 Sprite * Common::spanCloud(){
