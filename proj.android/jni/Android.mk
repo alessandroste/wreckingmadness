@@ -14,7 +14,8 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 ../../Classes/Building.cpp \
 ../../Classes/Floor.cpp \
 ../../Classes/MainMenuScene.cpp \
-../../Classes/Common.cpp
+../../Classes/Common.cpp \
+../../Classes/MD5.cpp
 
 LOCAL_CPPFLAGS := -DSDKBOX_ENABLED
 LOCAL_LDLIBS := -landroid \

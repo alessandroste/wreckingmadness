@@ -3,6 +3,7 @@
 #define _COMMON_H_
 
 #include "cocos2d.h"
+#include "network\HttpClient.h"
 
 using namespace cocos2d;
 
@@ -12,16 +13,32 @@ private:
 	float ball_length;
 	float ball_radius;
 public: 
+	// game common resources values
 	Color4B background;
 	std::string text_font;
 	int text_size;
+	Color3B playernamecolor;
+	Color4B playernamecolor_dark;
+
+	// constructor and deconstructor
+	Common(unsigned int chain_length = 20);
+	~Common();
+
+	// game sprites
+	Sprite * spanCloud();
+	Sprite * getSun();
+	Node * makeToast(std::string text, float duration);
 	Node * getBall();
 	float getBallLength();
 	float getBallRadius();
-	Common(unsigned int chain_length = 20);
-	~Common();
-	Sprite * spanCloud();
-	Sprite * getSun();
+
+	// score
+	unsigned int getTopLocalScore();
+	void setTopLocalScore(unsigned int score);
+	Node * getEndGameMenu(int score, int top_score);
+	void sendScore(unsigned int score); // returns the percentile
+	bool getPlayerID();
+	void onHttpRequestCompleted(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response);
 };
 
 

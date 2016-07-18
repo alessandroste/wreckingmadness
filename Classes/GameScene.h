@@ -43,6 +43,7 @@ class WreckingGame : public LayerColor
 	    std::string getRandomTypeName();
 		floorStatus getRandomFloorStatus();
 		std::map<std::string, std::string> types;
+		static WreckingGame * getGame();
 
 		// miscellaneous
 		float getTimeTick();
@@ -56,6 +57,9 @@ class WreckingGame : public LayerColor
 		void throwBall(int direction, bool stopped, float height);
 		void finishThrow();
 		void playCrashSound(bool metal);
+
+		// score
+		void percReceived(float perc);
 
 	    // implement the "static create()" method manually
 	    CREATE_FUNC(WreckingGame);

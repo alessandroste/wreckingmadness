@@ -54,7 +54,7 @@ bool TheMenu::init() {
 	this->size = Director::getInstance()->getVisibleSize();
 
 	// menu entries
-	Label * button_start_label = Label::createWithTTF("START", comm->text_font, comm->text_size);
+	Label * button_start_label = Label::createWithTTF("START", comm->text_font, comm->text_size*1.5);
 	button_start_label->setHorizontalAlignment(TextHAlignment::CENTER);
 	button_start_label->enableOutline(Color4B(0, 0, 0, 255), 2);
 	MenuItemLabel * button_start = MenuItemLabel::create(button_start_label, CC_CALLBACK_0(TheMenu::startGame, this));

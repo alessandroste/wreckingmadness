@@ -7,8 +7,6 @@
     #include "sdkbox/Sdkbox.h"
 #endif
 
-#define COCOS2D_DEBUG 1
-
 USING_NS_CC;
 
 static cocos2d::Size designResolutionSize = cocos2d::Size(480, 640);
@@ -79,7 +77,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	if (director->getContentScaleFactor() >= 3.0) searchOrder.push_back("4x");
 	if (director->getContentScaleFactor() >= 1.5) searchOrder.push_back("2x");
 	searchOrder.push_back("1x");
-	CCFileUtils::getInstance()->setSearchPaths(searchOrder);
+	FileUtils::getInstance()->setSearchPaths(searchOrder);
 
     #ifdef SDKBOX_ENABLED
         #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)

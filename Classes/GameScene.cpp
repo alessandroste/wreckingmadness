@@ -24,6 +24,9 @@ float floor_width = 0;
 bool end;
 Common * gamecomm;
 float scale;
+WreckingGame * ptr;
+Node * gmenu;
+float vel;
 
 // for Android NDK
 template <typename T>
@@ -44,14 +47,16 @@ bool WreckingGame::init(){
 	srand(time(NULL));
 	gamecomm = new Common(30);
 
-    this->types["sx"]="floor_dx.png";
-    this->types["dx"]="floor_sx.png";
-	this->types["both"] = "floor.png";
+    this->types["sx"]="floor_dx1.png";
+    this->types["dx"]="floor_sx1.png";
+	this->types["both"] = "floor1.png";
 
     if ( !LayerColor::initWithColor(gamecomm->background) ){
         return false;
     }
 	
+	ptr = this;
+
 	// viewport measurements
     size = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
@@ -61,9 +66,9 @@ bool WreckingGame::init(){
 	// score
 	this->score = 0;
     title = Label::createWithTTF("0", gamecomm->text_font, 40);
-    title->setPosition(Vec2(
-		origin.x + size.width/2,
-        origin.y + size.height - title->getContentSize().height));
+    title->setPosition(origin + Vec2(
+		size.width/2,
+        size.height - title->getContentSize().height));
 	title->setAnchorPoint(Vec2(0.5f,0.5f));
 	title->enableOutline(Color4B(0, 0, 0, 255), 1);
     this->addChild(title, 5);
@@ -80,13 +85,13 @@ bool WreckingGame::init(){
 
 	// ball
 	ball = gamecomm->getBall();
-	ball->setPosition(Vec2(origin.x-size.width, origin.y));
+	ball->setPosition(origin + Vec2(-size.width, 0));
 	this->addChild(ball, 2);
 	throwing = false;
 	// sun
 
 	Sprite * sun = gamecomm->getSun();
-	sun->setPosition(Vec2(origin.x-sun->getContentSize().width, origin.y+size.height*2/3));
+	sun->setPosition(origin + Vec2(-sun->getContentSize().width, size.height*2/3));
 	this->addChild(sun, 0);
 	sun->runAction(RepeatForever::create(Sequence::create(
 		MoveBy::create(50, Vec2(size.width + sun->getContentSize().width * 2, 0)),
@@ -104,7 +109,15 @@ bool WreckingGame::init(){
 	isTouchDown = false;
 	initialTouchPos[0] = 0;
 	initialTouchPos[1] = 0;
+
+	// player id
+	if (gamecomm->getPlayerID()) {
+		CCLOG("Player ID exists, it is %d", UserDefault::getInstance()->getIntegerForKey("playerid"));
+	}
 	
+	// difficulty
+	vel = VELOCITY;
+
 	#ifdef SDKBOX_ENABLED
 		sdkbox::PluginAdMob::init();
 		sdkbox::PluginAdMob::cache("gameover");
@@ -157,34 +170,26 @@ void WreckingGame::onTouchCancelled(Touch *touch, Event *event)
 }
 
 void WreckingGame::endGame() {
-	title->setString("LOSER\nPoints: " + to_string(this->score));
-	title->setHorizontalAlignment(TextHAlignment::CENTER);
-	title->setAnchorPoint(Vec2(0.5f, 0.5f));
-	title->setPositionY(origin.y + size.height*0.8);
+	title->removeFromParent();
 	Director::getInstance()->getEventDispatcher()->removeAllEventListeners();
 	for (int i = 0; i < this->myBuilding->getNumber(); i++) {
 		// better leave the building where it is
 		// this->myBuilding->getUpperFloor()->getSprite()->removeFromParentAndCleanup(true);
 		this->myBuilding->removeFloor();
 	}
+
+	// update top game score
+	if (score > gamecomm->getTopLocalScore()) gamecomm->setTopLocalScore(score);
+
 	// menu
-	Label * button_restart_label = Label::createWithTTF("RESTART",gamecomm->text_font,40);
-	Label * button_scores_label = Label::createWithTTF("SHARE", gamecomm->text_font, 40);
-	Label * button_exit_label = Label::createWithTTF("EXIT", gamecomm->text_font, 40);
-	button_restart_label->enableOutline(Color4B(0, 0, 0, 255), 1);
-	button_scores_label->enableOutline(Color4B(0, 0, 0, 255), 1);
-	button_exit_label->enableOutline(Color4B(0, 0, 0, 255), 1);
-	auto button_restart = MenuItemLabel::create(button_restart_label, CC_CALLBACK_0(WreckingGame::restartGame, this));
-	auto button_scores = MenuItemLabel::create(button_scores_label, CC_CALLBACK_0(WreckingGame::shareScore, this));
-	MenuItemLabel * button_exit = MenuItemLabel::create(button_exit_label, CC_CALLBACK_0(WreckingGame::closeCallback, this));
-	Vector<MenuItem *> menu_items;
-	menu_items.pushBack(button_restart);
-	menu_items.pushBack(button_scores);
-	menu_items.pushBack(button_exit);
-	auto menu = Menu::createWithArray(menu_items);
-	menu->setPosition(Vec2(origin.x + size.width / 2, origin.y + size.height / 2));
-	menu->alignItemsVertically();
-	this->addChild(menu, 5);
+	gmenu = gamecomm->getEndGameMenu(score, gamecomm->getTopLocalScore());
+	gmenu->getChildByName("bts")->getChildByName<MenuItemImage *>("bexit")->setCallback(CC_CALLBACK_0(WreckingGame::closeCallback, this));
+	gmenu->getChildByName("bts")->getChildByName<MenuItemImage *>("bshare")->setCallback(CC_CALLBACK_0(WreckingGame::shareScore, this));
+	gmenu->getChildByName("bts")->getChildByName<MenuItemImage *>("brestart")->setCallback(CC_CALLBACK_0(WreckingGame::restartGame, this));
+	this->addChild(gmenu,6);
+
+	gamecomm->sendScore(score);
+
 	#ifdef SDKBOX_ENABLED
 	CCLOG("END GAME CHECK AD");
 	if (sdkbox::PluginAdMob::isAvailable("gameover"))
@@ -247,7 +252,7 @@ void WreckingGame::update(float dt) {
 		} else if (!end) {
 			for (int i = 0; i < num; i++) {
 				float old_y = this->myBuilding->getNFloor(i)->getSprite()->getPositionY();
-				float y = old_y + VELOCITY*dt;
+				float y = old_y + vel*dt;
 				this->myBuilding->getNFloor(i)->getSprite()->setPositionY(y);
 			}
 		}
@@ -256,8 +261,7 @@ void WreckingGame::update(float dt) {
 	this->checkTouch(num);
 }
 
-void WreckingGame::menuCloseCallback(Ref* pSender)
-{
+void WreckingGame::menuCloseCallback(Ref* pSender) {
     Director::getInstance()->end();
 
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
@@ -269,13 +273,29 @@ void WreckingGame::menuCloseCallback(Ref* pSender)
 }
 
 void WreckingGame::afterCaptured(bool succeed, const std::string & outputFile){
+#ifdef SDKBOX_ENABLED
+	sdkbox::PluginAdMob::show("gameover");
+#endif	
 	if (succeed) {
+#ifdef COCOS2D_DEBUG
 		CCLOG(" screen shot %s", outputFile.c_str());
+#endif
+		Node * t = gamecomm->makeToast("Succeded", 2);
+		addChild(t,10);
+		t->getActionManager()->resumeTarget(t);
+	} else {
+		Node * t = gamecomm->makeToast("error encoutered", 2);
+		addChild(t, 10);
+		t->getActionManager()->resumeTarget(t);
 	}
 }
 
 void WreckingGame::shareScore(){
-	utils::captureScreen(CC_CALLBACK_2(WreckingGame::afterCaptured, this), "screen.png");
+	std::string target = "WreckingMadnessScreenshot.png";
+#ifdef SDKBOX_ENABLED
+	sdkbox::PluginAdMob::hide("gameover");
+#endif
+	utils::captureScreen(CC_CALLBACK_2(WreckingGame::afterCaptured, this), target);
 }
 
 void WreckingGame::spanCloud(bool random) {
@@ -336,6 +356,22 @@ void WreckingGame::playCrashSound(bool metal = false){
 	else 
 		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("metal_hit.wav");
 }
+
+void WreckingGame::percReceived(float perc){
+#ifdef COCOS2D_DEBUG
+	CCLOG("Percentage received by GAME %f", perc);
+#endif
+	if (gmenu != nullptr && gmenu->getChildByName("spinner") != nullptr) {
+		char str[100];
+		snprintf(str, sizeof(str), "Better than\n%.2f %%\nof players", perc);
+		gmenu->getChildByName("spinner")->removeFromParent();
+		Label * lblperc = Label::createWithTTF(str, gamecomm->text_font, gamecomm->text_size);
+		lblperc->setHorizontalAlignment(TextHAlignment::CENTER);
+		lblperc->setTextColor(Color4B(255,221,88,255));
+		lblperc->setPosition(origin + Vec2(size.width / 2, size.height / 1.4));
+		gmenu->addChild(lblperc, 2);
+	}
+}
  
 float WreckingGame::getTimeTick() {
     timeval time;
@@ -349,7 +385,7 @@ void WreckingGame::generateFloor(bool roof, float correction){
 	float y = origin.y;
 	std::string t;
 	if (roof) {
-		sprite = Sprite::create("roof.png");
+		sprite = Sprite::create("roof1.png");
 		t = "both";
 		floor_width = sprite->getBoundingBox().size.width;
 	}
@@ -372,15 +408,23 @@ void WreckingGame::removeTop(int dir){
 		MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
 		RemoveSelf::create(),
 		nullptr));
+
+	// remove floor and update score
+	this->myBuilding->removeFloor();
+	this->score++;
+	title->setString(to_string(this->score));
+	// change difficulty with score
+	vel += 1.0f/3;
+
+#ifdef COCOS2D_DEBUG
+	CCLOG("Velocity: %f", vel);
+#endif
 	ball->runAction(Sequence::create(
 		DelayTime::create(0.01f),
 		CallFunc::create(CC_CALLBACK_0(WreckingGame::playCrashSound,this,false)),
 		MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
 		CallFunc::create(CC_CALLBACK_0(WreckingGame::finishThrow, this)),
 		nullptr));
-	this->myBuilding->removeFloor();
-	this->score++;
-	title->setString(to_string(this->score));
 }
 
 bool WreckingGame::updateTop(std::string dir)
@@ -430,4 +474,8 @@ floorStatus WreckingGame::getRandomFloorStatus(){
 	case 2: return good;
 	default: return broken;
 	}
+}
+
+WreckingGame * WreckingGame::getGame(){
+	return ptr;
 }
