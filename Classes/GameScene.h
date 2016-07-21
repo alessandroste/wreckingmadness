@@ -4,6 +4,7 @@
 #include "cocos2d.h"
 #include "Building.h"
 #include "Floor.h"
+#include "Common.h"
 
 using namespace cocos2d;
 
@@ -15,6 +16,7 @@ class WreckingGame : public LayerColor
 	public:
 	    static Scene* createScene();
 		int score;
+		Common * gcomm;
 
 		// game events
 		void endGame();
@@ -60,6 +62,11 @@ class WreckingGame : public LayerColor
 
 		// score
 		void percReceived(float perc);
+
+#ifdef SDKBOX_ENABLED
+		void shareScreen(std::string file, std::string title);
+		void closeShare();
+#endif
 
 	    // implement the "static create()" method manually
 	    CREATE_FUNC(WreckingGame);

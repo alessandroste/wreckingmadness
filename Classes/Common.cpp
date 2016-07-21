@@ -146,17 +146,17 @@ Node * Common::getEndGameMenu(int score, int top_score){
 
 	// buttons
 	MenuItemImage * mb_exit = MenuItemImage::create("mb_exit_n.png", "mb_exit_p.png");
-	MenuItemImage * mb_share = MenuItemImage::create("mb_share_n.png", "mb_share_p.png");
+	MenuItemImage * mb_share = MenuItemImage::create("mb_fb_n.png", "mb_fb_p.png");
 	MenuItemImage * mb_restart = MenuItemImage::create("mb_restart_n.png", "mb_restart_p.png");
-	mb_exit->setName("bexit");
-	mb_share->setName("bshare");
-	mb_restart->setName("brestart");
+	mb_exit->setName("btn_exit");
+	mb_share->setName("btn_share");
+	mb_restart->setName("btn_restart");
 	Vector<MenuItem *> mbuttons;
 	mbuttons.pushBack(mb_exit);
 	mbuttons.pushBack(mb_share);
 	mbuttons.pushBack(mb_restart);
 	Menu * bt_menu = Menu::createWithArray(mbuttons);
-	bt_menu->setName("bts");
+	bt_menu->setName("btns");
 	bt_menu->alignItemsHorizontally();
 	bt_menu->setAnchorPoint(Vec2(0, 0.5));
 	bt_menu->setPosition(origin + Vec2(
@@ -268,6 +268,7 @@ Common::~Common(){
 }
 
 Sprite * Common::spanCloud(){
+	// 9 is number of sprite versions
 	int num = rand() % 9 + 1;
 	std::string s = "clouds/cloud" + to_string(num) + ".png";
 	Sprite * cloud = Sprite::create(s);
@@ -284,35 +285,37 @@ Sprite * Common::getSun(){
 	return sun;
 }
 
-Node * Common::makeToast(std::string text, float duration) {
-	float min_height = 20;
-	int text_size = 25;
-	Color4F back_col(0.3,0.3,0.3,1);
-	Node * toast = new Node;
-	DrawNode * back = DrawNode::create();
-	Label * lbl = Label::createWithTTF(text,text_font, text_size,
-		Size(Director::getInstance()->getVisibleSize().width / FILL, 0), TextHAlignment::CENTER);
-	float height;
-	(lbl->getContentSize().height > min_height) ? height = lbl->getContentSize().height : height = min_height;
-	height += 20;
-	back->drawSolidRect(
-		Vec2(0, 0),
-		Vec2(
-			Director::getInstance()->getVisibleSize().width,
-			height
-		),back_col);
-	back->setPosition(Vec2(0, 0));
-	toast->addChild(back);
-	lbl->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2, height / 2));
-	toast->addChild(lbl);
-	Action * act = Sequence::create(
-		MoveTo::create(1, Director::getInstance()->getVisibleOrigin() + Vec2(
-			0, Director::getInstance()->getVisibleSize().height - height)),
-		DelayTime::create(duration),
-		MoveBy::create(1, Vec2(0, height)),
-		RemoveSelf::create(),
-		nullptr);
-	toast->getActionManager()->addAction(act, toast, true);
-	toast->setPosition(Director::getInstance()->getVisibleOrigin() + Vec2(0, Director::getInstance()->getVisibleSize().height));
-	return toast;
+void Common::makeToast(std::string text, float duration, Layer * scene) {
+	if (scene != nullptr) {
+		float min_height = 20;
+		int text_size = 25;
+		Color4F back_col(0.3, 0.3, 0.3, 1);
+		Node * toast = new Node;
+		DrawNode * back = DrawNode::create();
+		Label * lbl = Label::createWithTTF(text, text_font, text_size,
+			Size(Director::getInstance()->getVisibleSize().width / FILL, 0), TextHAlignment::CENTER);
+		float height;
+		(lbl->getContentSize().height > min_height) ? height = lbl->getContentSize().height : height = min_height;
+		height += 20;
+		back->drawSolidRect(
+			Vec2(0, 0),
+			Vec2(
+				Director::getInstance()->getVisibleSize().width,
+				height
+				), back_col);
+		back->setPosition(Vec2(0, 0));
+		toast->addChild(back);
+		lbl->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2, height / 2));
+		toast->addChild(lbl);
+		Action * act = Sequence::create(
+			MoveTo::create(1, Director::getInstance()->getVisibleOrigin() + Vec2(
+				0, Director::getInstance()->getVisibleSize().height - height)),
+			DelayTime::create(duration),
+			MoveBy::create(1, Vec2(0, height)),
+			RemoveSelf::create(),
+			nullptr);
+		toast->setPosition(Director::getInstance()->getVisibleOrigin() + Vec2(0, Director::getInstance()->getVisibleSize().height));
+		scene->addChild(toast, 99);
+		toast->runAction(act);
+	}
 }

@@ -15,7 +15,8 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 ../../Classes/Floor.cpp \
 ../../Classes/MainMenuScene.cpp \
 ../../Classes/Common.cpp \
-../../Classes/MD5.cpp
+../../Classes/MD5.cpp \
+../../Classes/FBUtils.cpp
 
 LOCAL_CPPFLAGS := -DSDKBOX_ENABLED
 LOCAL_LDLIBS := -landroid \
@@ -23,7 +24,8 @@ LOCAL_LDLIBS := -landroid \
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes
 LOCAL_WHOLE_STATIC_LIBRARIES := \
 sdkbox \
-PluginAdMob
+PluginAdMob \
+PluginFacebook
 
 # _COCOS_HEADER_ANDROID_BEGIN
 # _COCOS_HEADER_ANDROID_END
@@ -41,6 +43,7 @@ $(call import-add-path,$(LOCAL_PATH))
 $(call import-module, ./prebuilt-mk)
 $(call import-module, ./sdkbox)
 $(call import-module, ./pluginadmob)
+$(call import-module, ./pluginfacebook)
 
 
 # _COCOS_LIB_IMPORT_ANDROID_BEGIN

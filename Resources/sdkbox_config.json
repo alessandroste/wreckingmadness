@@ -1,5 +1,10 @@
 {
     "android" : {
+        "Facebook" : {
+            "enabled" : true,
+            "debug" : true,
+            "facebook_id" : "479514052242691"
+        },
         "AdMob" : {
             "enabled" : true,
             "test" : false,
@@ -12,11 +17,6 @@
                     "height" : 0
                 }
             }
-        },
-        "Facebook" : {
-            "enabled" : true,
-            "debug" : false,
-            "facebook_id" : "479514052242691"
         }
     }
 }

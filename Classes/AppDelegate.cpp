@@ -4,6 +4,7 @@
 #include "SimpleAudioEngine.h"
 #ifdef SDKBOX_ENABLED
     #include "pluginadmob/PluginAdMob.h"
+    #include "pluginfacebook/PluginFacebook.h"
     #include "sdkbox/Sdkbox.h"
 #endif
 

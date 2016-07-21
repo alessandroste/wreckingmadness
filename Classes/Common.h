@@ -27,7 +27,6 @@ public:
 	// game sprites
 	Sprite * spanCloud();
 	Sprite * getSun();
-	Node * makeToast(std::string text, float duration);
 	Node * getBall();
 	float getBallLength();
 	float getBallRadius();
@@ -39,6 +38,9 @@ public:
 	void sendScore(unsigned int score); // returns the percentile
 	bool getPlayerID();
 	void onHttpRequestCompleted(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response);
+	
+	// utilities
+	void makeToast(std::string text, float duration, Layer * scene);
 };
 
 
