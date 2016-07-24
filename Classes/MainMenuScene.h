@@ -11,11 +11,14 @@ class TheMenu : public LayerColor
 	private:
 		void startGame();
 		void update(float dt);
-		Vec2 origin;
-		Size size;
+		Vec2 vorigin;
+		Size vsize;
+		Node * sprite_ball;
 	public:
+		Common * com;
 	    static Scene* createScene();
 	    void menuCloseCallback(Ref* pSender);
+		void menuSettingsCallback();
 		virtual bool init();
 
 		void spanCloud(bool random);

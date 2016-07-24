@@ -241,6 +241,7 @@ Common::Common(unsigned int chain_length){
 	this->background = Color4B(170, 210, 230, 255);
 	this->text_font = "fonts/Bungee-Regular.ttf";
 	this->text_size = 40;
+	credits_size = 25;
 	this->playernamecolor = Color3B(205, 220, 220);
 	this->playernamecolor_dark = Color4B(161, 177, 177, 255);
 	requesting = false;
@@ -264,7 +265,6 @@ Common::Common(unsigned int chain_length){
 }
 
 Common::~Common(){
-
 }
 
 Sprite * Common::spanCloud(){

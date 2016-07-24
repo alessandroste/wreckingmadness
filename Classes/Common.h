@@ -17,6 +17,7 @@ public:
 	Color4B background;
 	std::string text_font;
 	int text_size;
+	int credits_size;
 	Color3B playernamecolor;
 	Color4B playernamecolor_dark;
 

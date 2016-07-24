@@ -12,12 +12,30 @@ class WreckingGame : public LayerColor
 {
 	private:
 		void update(float dt);
-		Building* myBuilding;
+		Building* skyscraper;
+		Size vsize;
+		Vec2 vorigin;
+		Label * lbl_score;
+		Node * ball;
+		Node * menu_gameend;
+		float vel;
+		float vel_set;
+		float scale;
+		bool end;
+		bool throwing;
+		float floor_width;
+		
+		// block types
+	    int getTypesNumber();
+	    std::string getRandomTypeName();
+		floorStatus getRandomFloorStatus();
+		std::map<std::string, std::string> types;
+		
 	public:
+		Common * com; // will be accessed by FBUtils for notifications
 	    static Scene* createScene();
 		int score;
-		Common * gcomm;
-
+		
 		// game events
 		void endGame();
 		void restartGame();
@@ -40,11 +58,6 @@ class WreckingGame : public LayerColor
 		void removeTop(int dir);
 		bool updateTop(std::string dir);
 
-		// block types
-	    int getTypesNumber();
-	    std::string getRandomTypeName();
-		floorStatus getRandomFloorStatus();
-		std::map<std::string, std::string> types;
 		static WreckingGame * getGame();
 
 		// miscellaneous

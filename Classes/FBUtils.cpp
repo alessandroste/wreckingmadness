@@ -21,8 +21,8 @@ void FBL::onSharedSuccess(const std::string& message)
 {
     CCLOG("##FB onSharedSuccess:%s", message.c_str());
 	if (WreckingGame::getGame() != nullptr)
-		if (WreckingGame::getGame()->gcomm != nullptr){
-      WreckingGame::getGame()->gcomm->makeToast("Shared", 2, WreckingGame::getGame());
+		if (WreckingGame::getGame()->com != nullptr){
+      WreckingGame::getGame()->com->makeToast("Shared", 2, WreckingGame::getGame());
       WreckingGame::getGame()->closeShare();
     }
 }
@@ -31,8 +31,8 @@ void FBL::onSharedFailed(const std::string& message)
 {
     CCLOG("##FB onSharedFailed:%s", message.c_str());
 	if (WreckingGame::getGame() != nullptr)
-		if (WreckingGame::getGame()->gcomm != nullptr)
-			WreckingGame::getGame()->gcomm->makeToast("Share failed, check posting permissions", 2, WreckingGame::getGame());
+		if (WreckingGame::getGame()->com != nullptr)
+			WreckingGame::getGame()->com->makeToast("Share failed, check posting permissions", 2, WreckingGame::getGame());
 }
 
 void FBL::onSharedCancel()

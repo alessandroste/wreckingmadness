@@ -2,7 +2,7 @@
     "android" : {
         "Facebook" : {
             "enabled" : true,
-            "debug" : true,
+            "debug" : false,
             "facebook_id" : "479514052242691"
         },
         "AdMob" : {
