@@ -266,52 +266,12 @@ void WreckingGame::afterCaptured(bool succeed, const std::string & outputFile) {
 #endif	
 	if (succeed) {
 #ifdef SDKBOX_ENABLED
+		outfile = outputFile;
 		if (!sdkbox::PluginFacebook::isLoggedIn()) {
 			sdkbox::PluginFacebook::login();
+		} else {
+			checkPostPerm();
 		}
-
-		bool found = false;
-		for (auto& permission : sdkbox::PluginFacebook::getPermissionList()) {
-			if (permission.data() == sdkbox::FB_PERM_PUBLISH_POST) {
-				found = true;
-				CCLOG("Found permission to publish");
-				break;
-			}
-		}
-		if (!found) {
-			CCLOG("Not found permission to publish");
-			sdkbox::PluginFacebook::requestPublishPermissions({ sdkbox::FB_PERM_PUBLISH_POST });
-		}
-		else {
-			Layer * popup = Layer::create();
-			ui::ImageView * scr = ui::ImageView::create();
-			scr->loadTexture(outputFile);
-			scr->setScale(0.4);
-			scr->setPosition(vorigin + Vec2(vsize.width / 2, vsize.height * 2.2 / 3));
-			popup->addChild(scr, 2);
-			popup->setName("popup");
-			DrawNode * shadow = DrawNode::create();
-			shadow->drawSolidRect(Vec2(vorigin.x, vorigin.y), vorigin + Vec2(vsize.width, vsize.height), Color4F::BLACK);
-			popup->addChild(shadow);
-
-			MenuItemImage * button_go = MenuItemImage::create("mb_share_n.png", "mb_share_p.png",
-				CC_CALLBACK_0(WreckingGame::shareScreen, this, outputFile, ""));
-			button_go->setName("btn_go");
-			MenuItemImage * button_ret = MenuItemImage::create("mb_ret_n.png", "mb_ret_p.png",
-				CC_CALLBACK_0(WreckingGame::closeShare, this));
-			button_ret->setName("btn_ret");
-			Menu * menu_go = Menu::createWithArray({ button_ret, button_go });
-			menu_go->alignItemsHorizontally();
-			menu_go->setPosition(vorigin + Vec2(vsize.width / 2, vsize.height / 4 - com->text_size));
-			menu_go->setName("menu_go");
-			popup->addChild(menu_go, 2);
-			addChild(popup, 10);
-			menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_restart")->setEnabled(false);
-			menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_exit")->setEnabled(false);
-			menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_share")->setEnabled(false);
-			sdkbox::PluginAdMob::hide("gameover");
-		}
-
 #else
 		com->makeToast("Screenshot done", 2, this);
 #endif
@@ -329,6 +289,52 @@ void WreckingGame::closeShare() {
 	menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_exit")->setEnabled(true);
 	menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_share")->setEnabled(true);
 	sdkbox::PluginAdMob::show("gameover");
+}
+
+void WreckingGame::checkPostPerm(){
+	bool found = false;
+	for (auto& permission : sdkbox::PluginFacebook::getPermissionList()) {
+		if (permission.data() == sdkbox::FB_PERM_PUBLISH_POST) {
+			found = true;
+			CCLOG("Found permission to publish");
+			break;
+		}
+	}
+	if (!found) {
+		CCLOG("Not found permission to publish");
+		sdkbox::PluginFacebook::requestPublishPermissions({ sdkbox::FB_PERM_PUBLISH_POST });
+	} else {
+		shareDialog();
+	}
+}
+
+void WreckingGame::shareDialog(){
+	Layer * popup = Layer::create();
+	ui::ImageView * scr = ui::ImageView::create();
+	scr->loadTexture(outfile);
+	scr->setScale(0.4);
+	scr->setPosition(vorigin + Vec2(vsize.width / 2, vsize.height * 2.2 / 3));
+	popup->addChild(scr, 2);
+	popup->setName("popup");
+	DrawNode * shadow = DrawNode::create();
+	shadow->drawSolidRect(Vec2(vorigin.x, vorigin.y), vorigin + Vec2(vsize.width, vsize.height), Color4F::BLACK);
+	popup->addChild(shadow);
+	MenuItemImage * button_go = MenuItemImage::create("mb_share_n.png", "mb_share_p.png",
+		CC_CALLBACK_0(WreckingGame::shareScreen, this, outfile, ""));
+	button_go->setName("btn_go");
+	MenuItemImage * button_ret = MenuItemImage::create("mb_ret_n.png", "mb_ret_p.png",
+		CC_CALLBACK_0(WreckingGame::closeShare, this));
+	button_ret->setName("btn_ret");
+	Menu * menu_go = Menu::createWithArray({ button_ret, button_go });
+	menu_go->alignItemsHorizontally();
+	menu_go->setPosition(vorigin + Vec2(vsize.width / 2, vsize.height / 4 - com->text_size));
+	menu_go->setName("menu_go");
+	popup->addChild(menu_go, 2);
+	addChild(popup, 10);
+	menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_restart")->setEnabled(false);
+	menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_exit")->setEnabled(false);
+	menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage *>("btn_share")->setEnabled(false);
+	sdkbox::PluginAdMob::hide("gameover");
 }
 #endif
 

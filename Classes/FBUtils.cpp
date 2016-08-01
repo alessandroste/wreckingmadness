@@ -10,6 +10,11 @@ using namespace sdkbox;
 
 void FBL::onLogin(bool isLogin, const std::string& error){
     CCLOG("##FB isLogin: %d, message: %s", isLogin, error.c_str());
+    if (WreckingGame::getGame() != nullptr)
+      if (isLogin)
+        WreckingGame::getGame()->checkPostPerm();
+      else
+        WreckingGame::getGame()->com->makeToast("Could not login to Facebook", 2, WreckingGame::getGame());
 }
 
 void FBL::onAPI(const std::string& tag, const std::string& jsonData)
@@ -43,6 +48,20 @@ void FBL::onSharedCancel()
 void FBL::onPermission(bool isLogin, const std::string& error)
 {
     CCLOG("##FB onPermission: %d, error: %s", isLogin, error.c_str());
+    if (WreckingGame::getGame() != nullptr){
+      bool found = false;
+      for (auto& permission : sdkbox::PluginFacebook::getPermissionList()) {
+        if (permission.data() == sdkbox::FB_PERM_PUBLISH_POST) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        WreckingGame::getGame()->com->makeToast("You have to enable permission to share", 2, WreckingGame::getGame());
+      } else {
+        WreckingGame::getGame()->shareDialog();
+      }
+    }
 }
 
 void FBL::onFetchFriends(bool ok, const std::string& msg)

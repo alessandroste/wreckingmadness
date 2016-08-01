@@ -24,6 +24,7 @@ class WreckingGame : public LayerColor
 		bool end;
 		bool throwing;
 		float floor_width;
+		std::string outfile;
 		
 		// block types
 	    int getTypesNumber();
@@ -79,6 +80,8 @@ class WreckingGame : public LayerColor
 #ifdef SDKBOX_ENABLED
 		void shareScreen(std::string file, std::string title);
 		void closeShare();
+		void checkPostPerm();
+		void shareDialog();
 #endif
 
 	    // implement the "static create()" method manually

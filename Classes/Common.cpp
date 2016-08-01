@@ -6,7 +6,7 @@
 #define CHAIN_DISP 0.17
 #define SCORE_KEY "poefjowvoavsdpf"
 #define ID_KEY "owqenpsdfopwndsa"
-#define API_LOC "http://alessandroste.host-ed.me/wm_services/"
+#define API_LOC "http://aleste.heavybeard.it/wm_services/"
 #define GID_LOC "GetPlayerID.php"
 #define UPD_LOC "UpdateScore.php"
 #define FILL 2.2
@@ -315,7 +315,7 @@ void Common::makeToast(std::string text, float duration, Layer * scene) {
 			RemoveSelf::create(),
 			nullptr);
 		toast->setPosition(Director::getInstance()->getVisibleOrigin() + Vec2(0, Director::getInstance()->getVisibleSize().height));
-		scene->addChild(toast, 99);
+		Director::getInstance()->getRunningScene()->addChild(toast, 999);
 		toast->runAction(act);
 	}
 }
