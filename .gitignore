@@ -1,0 +1,15 @@
+**/bin/
+**/gen/
+**/obj/
+**/*.log
+
+CMakeCache.txt
+**/CMakeFiles/
+cocos2d/
+
+# Android
+proj.android*/**/.idea
+
+# Linux
+proj.linux/*
+!proj.linux/*.cpp
