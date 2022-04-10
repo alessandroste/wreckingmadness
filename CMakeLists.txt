@@ -64,7 +64,7 @@ list(APPEND GAME_SOURCE
     Classes/MainMenuScene.cpp
     Classes/MD5.cpp
     Classes/SettingsScene.cpp
-    Classes/Utils.cpp
+    Classes/Utilities.cpp
 )
 list(APPEND GAME_HEADER
     Classes/AppDelegate.h
@@ -76,7 +76,7 @@ list(APPEND GAME_HEADER
     Classes/MainMenuScene.h
     Classes/MD5.h
     Classes/SettingsScene.h
-    Classes/Utils.h
+    Classes/Utilities.h
 )
 
 if(ANDROID)

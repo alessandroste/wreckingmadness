@@ -1,13 +1,13 @@
 {
-    "name": "Cocos",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "args": {}
-    },
-    "settings": {},
-    "extensions": [],
-    "mounts": [],
-    "forwardPorts": [],
-    // Replace when using a ptrace-based debugger like C++, Go, and Rust
-    // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ]
+  "name": "Cocos",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {}
+  },
+  "settings": {},
+  "extensions": [],
+  "mounts": [],
+  "forwardPorts": [],
+  // Replace when using a ptrace-based debugger like C++, Go, and Rust
+  // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ]
 }
