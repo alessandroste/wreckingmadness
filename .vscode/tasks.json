@@ -47,6 +47,15 @@
         "on"
       ],
       "problemMatcher": []
+    },
+    {
+      "label": "Run game (Windows)",
+      "type": "process",
+      "command": "MyGame.exe",
+      "options": {
+        "cwd": "${workspaceFolder}\\proj.win32\\build\\bin\\MyGame\\Debug"
+      },
+      "problemMatcher": []
     }
   ]
 }

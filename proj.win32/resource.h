@@ -3,10 +3,10 @@
 // Used by game.RC
 //
 
-#define IDS_PROJNAME                100
-#define IDR_TESTJS    100
+#define IDS_PROJNAME 100
+#define IDR_TESTJS 100
 
-#define ID_FILE_NEW_WINDOW            32771
+#define ID_FILE_NEW_WINDOW 32771
 
 // Next default values for new objects
 // 

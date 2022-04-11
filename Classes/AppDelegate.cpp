@@ -74,8 +74,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     register_all_packages();
 
-    // cocos2d-x uses a folder based approach
-    // CCLOG("Content scale factor %f", director->getContentScaleFactor());
+    CCLOG("Content scale factor %f", director->getContentScaleFactor());
     std::vector<std::string> searchOrder;
     if (director->getContentScaleFactor() >= 3.0)
         searchOrder.push_back("4x");

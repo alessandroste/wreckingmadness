@@ -8,11 +8,11 @@ class Utilities
 {
 public:
     template <typename T>
-    static std::string to_string(T& value);
+    static std::string to_string(T value);
 };
 
 template <typename T>
-std::string Utilities::to_string(T& value) {
+std::string Utilities::to_string(T value) {
     std::ostringstream os;
     os << value;
     return os.str();
