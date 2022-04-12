@@ -55,7 +55,19 @@
       "options": {
         "cwd": "${workspaceFolder}\\proj.win32\\build\\bin\\MyGame\\Debug"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "dependsOn": [
+        "Build (Windows)"
+      ]
+    },
+    {
+      "label": "Build (Windows)",
+      "type": "shell",
+      "command": "C:\\msys64\\mingw64\\bin\\cmake",
+      "args": [
+        "--build",
+        "${workspaceFolder}\\proj.win32\\build"
+      ]
     }
   ]
 }

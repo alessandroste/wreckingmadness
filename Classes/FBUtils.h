@@ -9,7 +9,6 @@
 class FBL : public sdkbox::FacebookListener
 {
 public:
-    // Facebook callbacks
     void onLogin(bool isLogin, const std::string& msg);
     void onSharedSuccess(const std::string& message);
     void onSharedFailed(const std::string& message);

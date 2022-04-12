@@ -13,7 +13,7 @@
 USING_NS_CC;
 
 #define VELOCITY 320
-#define MAX_VELOCITY 450
+#define MAX_VELOCITY 450.0f
 #define VEL_STEP 0.01f
 #define SWIPE_FACTOR 14
 #define CLOUD_SPEED 20
@@ -22,16 +22,16 @@ USING_NS_CC;
 #define BREAK_SPEED 3000
 #define SCREEN_FILE "screenshot.png"
 
-WreckingGame* ptr;
+GameScene* ptr;
 
-Scene* WreckingGame::createScene() {
+Scene* GameScene::createScene() {
     Scene* scene = Scene::create();
-    WreckingGame* layer = WreckingGame::create();
+    GameScene* layer = GameScene::create();
     scene->addChild(layer);
     return scene;
 }
 
-bool WreckingGame::init() {
+bool GameScene::init() {
     // utilities
     ptr = this;
     srand(time(NULL));
@@ -91,10 +91,10 @@ bool WreckingGame::init() {
     // touch
     EventListenerTouchOneByOne* listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
-    listener->onTouchBegan = CC_CALLBACK_2(WreckingGame::onTouchBegan, this);
-    listener->onTouchMoved = CC_CALLBACK_2(WreckingGame::onTouchMoved, this);
-    listener->onTouchEnded = CC_CALLBACK_2(WreckingGame::onTouchEnded, this);
-    listener->onTouchCancelled = CC_CALLBACK_2(WreckingGame::onTouchCancelled, this);
+    listener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
+    listener->onTouchMoved = CC_CALLBACK_2(GameScene::onTouchMoved, this);
+    listener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded, this);
+    listener->onTouchCancelled = CC_CALLBACK_2(GameScene::onTouchCancelled, this);
     Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
     isTouchDown = false;
     initialTouchPos[0] = 0;
@@ -118,15 +118,15 @@ bool WreckingGame::init() {
     return true;
 }
 
-void WreckingGame::onEnterTransitionDidFinish() {
+void GameScene::onEnterTransitionDidFinish() {
     scheduleUpdate();
 }
 
-void WreckingGame::onExitTransitionDidStart() {
+void GameScene::onExitTransitionDidStart() {
     unscheduleUpdate();
 }
 
-void WreckingGame::closeCallback() {
+void GameScene::closeCallback() {
     CocosDenshion::SimpleAudioEngine::getInstance()->unloadEffect("hit.wav");
     Director::getInstance()->end();
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
@@ -136,7 +136,7 @@ void WreckingGame::closeCallback() {
 #endif
 }
 
-bool WreckingGame::onTouchBegan(Touch* touch, Event* event) {
+bool GameScene::onTouchBegan(Touch* touch, Event* event) {
     initialTouchPos[0] = touch->getLocation().x;
     initialTouchPos[1] = touch->getLocation().y;
     currentTouchPos[0] = touch->getLocation().x;
@@ -145,20 +145,20 @@ bool WreckingGame::onTouchBegan(Touch* touch, Event* event) {
     return true;
 }
 
-void WreckingGame::onTouchMoved(Touch* touch, Event* event) {
+void GameScene::onTouchMoved(Touch* touch, Event* event) {
     currentTouchPos[0] = touch->getLocation().x;
     currentTouchPos[1] = touch->getLocation().y;
 }
 
-void WreckingGame::onTouchEnded(Touch* touch, Event* event) {
+void GameScene::onTouchEnded(Touch* touch, Event* event) {
     isTouchDown = false;
 }
 
-void WreckingGame::onTouchCancelled(Touch* touch, Event* event) {
+void GameScene::onTouchCancelled(Touch* touch, Event* event) {
     onTouchEnded(touch, event);
 }
 
-void WreckingGame::endGame() {
+void GameScene::endGame() {
     lbl_score->removeFromParent();
     Director::getInstance()->getEventDispatcher()->removeAllEventListeners();
     for (int i = 0; i < skyscraper->getNumber(); i++) {
@@ -171,9 +171,11 @@ void WreckingGame::endGame() {
 
     // menu
     menu_gameend = com->getEndGameMenu(score, com->getTopLocalScore());
-    menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_exit")->setCallback(CC_CALLBACK_0(WreckingGame::closeCallback, this));
-    menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_share")->setCallback(CC_CALLBACK_0(WreckingGame::shareScore, this));
-    menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_restart")->setCallback(CC_CALLBACK_0(WreckingGame::restartGame, this));
+    menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_exit")->setCallback(CC_CALLBACK_0(GameScene::closeCallback, this));
+#ifdef SDKBOX_ENABLED
+    menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_share")->setCallback(CC_CALLBACK_0(GameScene::shareScore, this));
+#endif
+    menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_restart")->setCallback(CC_CALLBACK_0(GameScene::restartGame, this));
     addChild(menu_gameend, 6);
 
     com->sendScore(score);
@@ -186,16 +188,16 @@ void WreckingGame::endGame() {
 #endif
 }
 
-void WreckingGame::restartGame() {
+void GameScene::restartGame() {
 #ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::cache("gameover");
     sdkbox::PluginAdMob::hide("gameover");
 #endif
-    Scene* newScene = WreckingGame::createScene();
+    Scene* newScene = GameScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5, newScene));
 }
 
-void WreckingGame::checkTouch(int num) {
+void GameScene::checkTouch(int num) {
     if (num > 0 && isTouchDown) {
         if (initialTouchPos[0] - currentTouchPos[0] > SWIPE_FACTOR) {
             if (skyscraper->getUpperFloor()->fl_type == "sx" || skyscraper->getUpperFloor()->fl_type == "both") {
@@ -216,7 +218,7 @@ void WreckingGame::checkTouch(int num) {
     }
 }
 
-void WreckingGame::update(float dt) {
+void GameScene::update(float dt) {
     int num = skyscraper->getNumber();
     if (num != 0) {
         float upper_position = skyscraper->getUpperFloor()->getSprite()->getPositionY();
@@ -241,7 +243,7 @@ void WreckingGame::update(float dt) {
     checkTouch(num);
 }
 
-void WreckingGame::menuCloseCallback(Ref* pSender) {
+void GameScene::menuCloseCallback(Ref* pSender) {
     Director::getInstance()->end();
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
@@ -252,7 +254,7 @@ void WreckingGame::menuCloseCallback(Ref* pSender) {
 #endif
 }
 
-void WreckingGame::afterCaptured(bool succeed, const std::string& outputFile) {
+void GameScene::afterCaptured(bool succeed, const std::string& outputFile) {
 #ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::show("gameover");
 #endif
@@ -275,7 +277,7 @@ void WreckingGame::afterCaptured(bool succeed, const std::string& outputFile) {
 }
 
 #ifdef SDKBOX_ENABLED
-void WreckingGame::closeShare() {
+void GameScene::closeShare() {
     getChildByName("popup")->removeAllChildren();
     getChildByName("popup")->removeFromParent();
     menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_restart")->setEnabled(true);
@@ -284,7 +286,7 @@ void WreckingGame::closeShare() {
     sdkbox::PluginAdMob::show("gameover");
 }
 
-void WreckingGame::checkPostPerm() {
+void GameScene::checkPostPerm() {
     bool found = false;
     for (auto& permission : sdkbox::PluginFacebook::getPermissionList()) {
         if (permission.data() == sdkbox::FB_PERM_PUBLISH_POST) {
@@ -302,7 +304,7 @@ void WreckingGame::checkPostPerm() {
     }
 }
 
-void WreckingGame::shareDialog() {
+void GameScene::shareDialog() {
     Layer* popup = Layer::create();
     ui::ImageView* scr = ui::ImageView::create();
     scr->loadTexture(outfile);
@@ -314,10 +316,10 @@ void WreckingGame::shareDialog() {
     shadow->drawSolidRect(Vec2(vorigin.x, vorigin.y), vorigin + Vec2(vsize.width, vsize.height), Color4F::BLACK);
     popup->addChild(shadow);
     MenuItemImage* button_go = MenuItemImage::create("mb_share_n.png", "mb_share_p.png",
-        CC_CALLBACK_0(WreckingGame::shareScreen, this, outfile, ""));
+        CC_CALLBACK_0(GameScene::shareScreen, this, outfile, ""));
     button_go->setName("btn_go");
     MenuItemImage* button_ret = MenuItemImage::create("mb_ret_n.png", "mb_ret_p.png",
-        CC_CALLBACK_0(WreckingGame::closeShare, this));
+        CC_CALLBACK_0(GameScene::closeShare, this));
     button_ret->setName("btn_ret");
     Menu* menu_go = Menu::createWithArray({ button_ret, button_go });
     menu_go->alignItemsHorizontally();
@@ -332,14 +334,14 @@ void WreckingGame::shareDialog() {
 }
 #endif
 
-void WreckingGame::shareScore() {
+void GameScene::shareScore() {
 #ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::hide("gameover");
 #endif
-    utils::captureScreen(CC_CALLBACK_2(WreckingGame::afterCaptured, this), SCREEN_FILE);
+    utils::captureScreen(CC_CALLBACK_2(GameScene::afterCaptured, this), SCREEN_FILE);
 }
 
-void WreckingGame::spanCloud(bool random) {
+void GameScene::spanCloud(bool random) {
     Sprite* cloud = com->spanCloud();
     float cloud_height = vorigin.y + ((float)rand() / (float)(RAND_MAX / vsize.height));
     float cloud_vel = CLOUD_SPEED_OFFSET + (float)rand() / (float)(RAND_MAX / CLOUD_SPEED);
@@ -359,7 +361,7 @@ void WreckingGame::spanCloud(bool random) {
         nullptr));
 }
 
-void WreckingGame::throwBall(int direction = 1, bool stopped = false, float height = 0) {
+void GameScene::throwBall(int direction = 1, bool stopped = false, float height = 0) {
     if (!throwing) {
         throwing = true;
         float xpos;
@@ -378,38 +380,38 @@ void WreckingGame::throwBall(int direction = 1, bool stopped = false, float heig
         if (!stopped) {
             ball->runAction(Sequence::create(
                 MoveBy::create(space1 / BREAK_SPEED, Vec2(direction * space1, 0)),
-                CallFunc::create(CC_CALLBACK_0(WreckingGame::playCrashSound, this, false)),
-                CallFunc::create(CC_CALLBACK_0(WreckingGame::removeTop, this, direction)),
+                CallFunc::create(CC_CALLBACK_0(GameScene::playCrashSound, this, false)),
+                CallFunc::create(CC_CALLBACK_0(GameScene::removeTop, this, direction)),
                 DelayTime::create(0.02f),
                 MoveBy::create(space / BREAK_SPEED, Vec2(direction * space, 0)),
-                CallFunc::create(CC_CALLBACK_0(WreckingGame::finishThrow, this)),
+                CallFunc::create(CC_CALLBACK_0(GameScene::finishThrow, this)),
                 nullptr));
         }
         else {
             ball->runAction(Sequence::create(
                 MoveBy::create(0.05f, Vec2(direction * space1, 0)),
-                CallFunc::create(CC_CALLBACK_0(WreckingGame::playCrashSound, this, true)),
+                CallFunc::create(CC_CALLBACK_0(GameScene::playCrashSound, this, true)),
                 MoveBy::create(0.2f, Vec2(-direction * space1, 0)),
-                CallFunc::create(CC_CALLBACK_0(WreckingGame::finishThrow, this)),
+                CallFunc::create(CC_CALLBACK_0(GameScene::finishThrow, this)),
                 nullptr));
         }
     }
 }
 
-void WreckingGame::finishThrow() {
+void GameScene::finishThrow() {
     throwing = false;
 }
 
-void WreckingGame::playCrashSound(bool metal = false) {
+void GameScene::playCrashSound(bool metal = false) {
     if (!metal)
         CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
     else
         CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("metal_hit.wav");
 }
 
-void WreckingGame::percReceived(float perc) {
+void GameScene::percReceived(float perc) {
 #ifdef COCOS2D_DEBUG
-    CCLOG("Percentage received by GAME %f", perc);
+    cocos2d::log("Percentage received by GAME %f", perc);
 #endif
     if (menu_gameend != nullptr && menu_gameend->getChildByName("spinner") != nullptr) {
         char str[100];
@@ -424,7 +426,7 @@ void WreckingGame::percReceived(float perc) {
 }
 
 #ifdef SDKBOX_ENABLED
-void WreckingGame::shareScreen(std::string file, std::string title) {
+void GameScene::shareScreen(std::string file, std::string title) {
     sdkbox::FBShareInfo info;
     info.type = sdkbox::FB_PHOTO;
     info.title = title;
@@ -442,14 +444,14 @@ void WreckingGame::shareScreen(std::string file, std::string title) {
 
 #endif // SDKBOX_ENABLED
 
-float WreckingGame::getTimeTick() {
+float GameScene::getTimeTick() {
     timeval time;
     gettimeofday(&time, NULL);
     unsigned long millisecs = (time.tv_sec * 1000) + (time.tv_usec / 1000);
     return (float)millisecs;
 }
 
-void WreckingGame::generateFloor(bool roof, float correction) {
+void GameScene::generateFloor(bool roof, float correction) {
     Sprite* sprite;
     float y = vorigin.y;
     std::string t;
@@ -470,7 +472,7 @@ void WreckingGame::generateFloor(bool roof, float correction) {
     skyscraper->addFloor(cur_floor);
 }
 
-void WreckingGame::removeTop(int dir) {
+void GameScene::removeTop(int dir) {
     if (!end) {
         // this space has to be the same also for floor
         float space = vsize.width + floor_width;
@@ -494,7 +496,7 @@ void WreckingGame::removeTop(int dir) {
     }
 }
 
-bool WreckingGame::updateTop(std::string dir) {
+bool GameScene::updateTop(std::string dir) {
     int sign = 0;
     if (dir == "dx")
         sign = 1;
@@ -511,13 +513,13 @@ bool WreckingGame::updateTop(std::string dir) {
     case half:
         {
             skyscraper->getUpperFloor()->fl_status = broken;
-            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create((float)0.01, Vec2(30 * sign, 0)));
+            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
             return false;
         }
     case good:
         {
             skyscraper->getUpperFloor()->fl_status = half;
-            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create((float)0.01, Vec2(30 * sign, 0)));
+            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
             return false;
         }
     default:
@@ -525,11 +527,11 @@ bool WreckingGame::updateTop(std::string dir) {
     }
 }
 
-int WreckingGame::getTypesNumber() {
+int GameScene::getTypesNumber() {
     return types.size();
 }
 
-std::string WreckingGame::getRandomTypeName() {
+std::string GameScene::getRandomTypeName() {
     std::vector<std::string> vt_types;
     std::map<std::string, std::string>::iterator it;
     for (it = types.begin(); it != types.end(); it++) {
@@ -539,7 +541,7 @@ std::string WreckingGame::getRandomTypeName() {
     return vt_types[rand() % num];
 }
 
-floorStatus WreckingGame::getRandomFloorStatus() {
+floorStatus GameScene::getRandomFloorStatus() {
     switch (rand() % 3) {
     case 0:
         return broken;
@@ -552,6 +554,6 @@ floorStatus WreckingGame::getRandomFloorStatus() {
     }
 }
 
-WreckingGame* WreckingGame::getGame() {
+GameScene* GameScene::getGame() {
     return ptr;
 }

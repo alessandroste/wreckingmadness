@@ -10,24 +10,25 @@ using namespace cocos2d;
 class SettingsScene : public LayerColor
 {
 private:
-	Common * com;
-	Size vsize;
-	Vec2 vorigin;
-	void update(float dt);
-	void toggleMusic();
-	MenuItemImage * btn_music;
+    Common* com;
+    Size vsize;
+    Vec2 vorigin;
+    void update(float dt);
+    void toggleMusic();
+    MenuItemImage* btn_music;
 public:
-	static Scene* createScene();
-	~SettingsScene();
-	void returnCallback();
-	virtual bool init();
+    static Scene* createScene();
+    ~SettingsScene();
+    void returnCallback();
+    virtual bool init();
 #ifdef SDKBOX_ENABLED
-	void logoutCallback();
+    void logoutCallback();
 #endif
-	void onEnterTransitionDidFinish();
-	void onExitTransitionDidFinish();
-	// implement the "static create()" method manually
-	CREATE_FUNC(SettingsScene);
+    void onEnterTransitionDidFinish();
+    void onExitTransitionDidFinish();
+
+    // implement the "static create()" method manually
+    CREATE_FUNC(SettingsScene);
 };
 
 #endif

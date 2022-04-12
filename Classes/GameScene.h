@@ -8,7 +8,7 @@
 
 using namespace cocos2d;
 
-class WreckingGame : public LayerColor
+class GameScene : public LayerColor
 {
 private:
     void update(float dt);
@@ -35,7 +35,7 @@ private:
 public:
     Common* com; // will be accessed by FBUtils for notifications
     static Scene* createScene();
-    int score;
+    unsigned int score;
 
     // game events
     void endGame();
@@ -59,7 +59,7 @@ public:
     void removeTop(int dir);
     bool updateTop(std::string dir);
 
-    static WreckingGame* getGame();
+    static GameScene* getGame();
 
     // miscellaneous
     float getTimeTick();
@@ -85,7 +85,7 @@ public:
 #endif
 
     // implement the "static create()" method manually
-    CREATE_FUNC(WreckingGame);
+    CREATE_FUNC(GameScene);
 };
 
 #endif

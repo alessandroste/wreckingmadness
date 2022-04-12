@@ -19,7 +19,7 @@ SettingsScene::~SettingsScene() {
 }
 
 void SettingsScene::returnCallback() {
-    Director::getInstance()->replaceScene(TransitionFade::create(0.5, TheMenu::createScene()));
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5, MainMenuScene::createScene()));
 }
 
 bool SettingsScene::init() {
@@ -47,7 +47,7 @@ bool SettingsScene::init() {
     credits.append("Many free resources have been used, credits to kenney.nl for sprites (some retouched).");
 
     Label* lbl_credits = Label::createWithTTF(credits, com->text_font, com->credits_size,
-        Size(vsize.width / 1.1, 0));
+        Size(vsize.width / 1.1f, 0));
     lbl_credits->setAnchorPoint(Vec2(0.5, 1));
     lbl_credits->enableOutline(Color4B(0, 0, 0, 255), 2);
     lbl_credits->setPosition(vorigin + Vec2(vsize.width / 2, vsize.height - com->credits_size));

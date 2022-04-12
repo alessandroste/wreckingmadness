@@ -4,13 +4,13 @@
 #include "GameScene.h"
 #include "Utilities.h"
 
-#define CHAIN_DISP 0.17
+#define CHAIN_DISP 0.17f
 #define SCORE_KEY "poefjowvoavsdpf"
 #define ID_KEY "owqenpsdfopwndsa"
 #define API_LOC "http://aleste.heavybeard.it/wm_services/"
 #define GID_LOC "GetPlayerID.php"
 #define UPD_LOC "UpdateScore.php"
-#define FILL 2.2
+#define FILL 2.2f
 
 Sprite* ball_s;
 std::vector<Sprite*> chain_s;
@@ -39,10 +39,10 @@ void Common::setTopLocalScore(unsigned int score) {
 
 Node* Common::getEndGameMenu(int score, int top_score) {
     float off = 15;
-    Color4F color(172 / 255.0, 192 / 255.0, 193 / 255.0, 1);
-    Color4F lightcolor(180 / 255.0, 198 / 255.0, 199 / 255.0, 1);
+    Color4F color(172 / 255.0, 192 / 255.0, 193 / 255.0, 1.0f);
+    Color4F lightcolor(180 / 255.0, 198 / 255.0, 199 / 255.0, 1.0f);
     Color4B darkcolor(116, 139, 139, 1);
-    Color4F boltcolor(161 / 255.0, 177 / 255.0, 177 / 255.0, 1);
+    Color4F boltcolor(161 / 255.0, 177 / 255.0, 177 / 255.0, 1.0f);
     Color4B boltcolorB(150, 166, 166, 255);
     Node* menu = new Node;
     Size screensize = Director::getInstance()->getVisibleSize();
@@ -82,7 +82,7 @@ Node* Common::getEndGameMenu(int score, int top_score) {
     menu->addChild(stripes);
 
     // drawing bolts
-    float boltradius = 6;
+    float boltradius = 6.0f;
     DrawNode* bolt1 = DrawNode::create();
     DrawNode* bolt2 = DrawNode::create();
     DrawNode* bolt3 = DrawNode::create();
@@ -106,7 +106,7 @@ Node* Common::getEndGameMenu(int score, int top_score) {
 
     Sprite* spinner = Sprite::create("spinner.png");
     spinner->setName("spinner");
-    spinner->setScale(0.6);
+    spinner->setScale(0.6f);
     spinner->setPosition(origin + Vec2(screensize.width / 2, screensize.height / 1.4));
     spinner->runAction(RepeatForever::create(RotateBy::create(0.1, 2 * M_PI)));
     menu->addChild(spinner);
@@ -139,14 +139,16 @@ Node* Common::getEndGameMenu(int score, int top_score) {
 
     // buttons
     MenuItemImage* mb_exit = MenuItemImage::create("mb_exit_n.png", "mb_exit_p.png");
-    MenuItemImage* mb_share = MenuItemImage::create("mb_fb_n.png", "mb_fb_p.png");
     MenuItemImage* mb_restart = MenuItemImage::create("mb_restart_n.png", "mb_restart_p.png");
     mb_exit->setName("btn_exit");
-    mb_share->setName("btn_share");
     mb_restart->setName("btn_restart");
     Vector<MenuItem*> mbuttons;
     mbuttons.pushBack(mb_exit);
+#ifdef SDKBOX_ENABLED
+    MenuItemImage* mb_share = MenuItemImage::create("mb_fb_n.png", "mb_fb_p.png");
+    mb_share->setName("btn_share");
     mbuttons.pushBack(mb_share);
+#endif
     mbuttons.pushBack(mb_restart);
     Menu* bt_menu = Menu::createWithArray(mbuttons);
     bt_menu->setName("btns");
@@ -154,7 +156,7 @@ Node* Common::getEndGameMenu(int score, int top_score) {
     bt_menu->setAnchorPoint(Vec2(0, 0.5));
     bt_menu->setPosition(origin + Vec2(
         screensize.width / 2,
-        screensize.height * (1.0 / 2 - 1 / FILL) + border * 4));
+        screensize.height * (1.0f / 2 - 1 / FILL) + border * 4));
     menu->addChild(bt_menu);
     return menu;
 }
@@ -220,7 +222,7 @@ void Common::onHttpRequestCompleted(cocos2d::network::HttpClient* sender, cocos2
         std::strcpy(concatenated, s2.c_str());
         CCLOG("Response for score update %s", concatenated);
         float perc = atof(concatenated);
-        WreckingGame* g = WreckingGame::getGame();
+        GameScene* g = GameScene::getGame();
         if (g == nullptr) {
             CCLOG("Can't connect to game scene");
         }
@@ -235,8 +237,6 @@ Common::Common(unsigned int chain_length) {
     // common settings
     this->background = Color4B(170, 210, 230, 255);
     this->text_font = "fonts/Bungee-Regular.ttf";
-    this->text_size = 40;
-    credits_size = 25;
     this->playernamecolor = Color3B(205, 220, 220);
     this->playernamecolor_dark = Color4B(161, 177, 177, 255);
     requesting = false;
@@ -256,6 +256,7 @@ Common::Common(unsigned int chain_length) {
         ball->addChild(chain);
         ball_s->setPosition(Vec2(0, -ball_s->getContentSize().height / 2 - i * chain->getContentSize().height * (1 - CHAIN_DISP)));
     }
+
     ball->addChild(ball_s);
 }
 
@@ -263,8 +264,7 @@ Common::~Common() {
 }
 
 Sprite* Common::spanCloud() {
-    // 9 is number of sprite versions
-    int num = rand() % 9 + 1;
+    int num = rand() % 9 + 1; // 9 is number of sprite versions
     std::string s = "clouds/cloud" + Utilities::to_string(num) + ".png";
     Sprite* cloud = Sprite::create(s);
     return cloud;
@@ -285,7 +285,7 @@ void Common::makeToast(std::string text, float duration, Layer* scene) {
         float min_height = 20;
         int text_size = 25;
         Color4F back_col(0.3, 0.3, 0.3, 1);
-        Node* toast = new Node;
+        Node* toast = new Node();
         DrawNode* back = DrawNode::create();
         Label* lbl = Label::createWithTTF(text, text_font, text_size,
             Size(Director::getInstance()->getVisibleSize().width / FILL, 0), TextHAlignment::CENTER);

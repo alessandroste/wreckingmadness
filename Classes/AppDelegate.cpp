@@ -92,7 +92,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 #endif
 
     // run
-    director->runWithScene(TheMenu::createScene());
+    director->runWithScene(MainMenuScene::createScene());
     return true;
 }
 

@@ -40,14 +40,14 @@ private:
 };
 #endif
 
-Scene* TheMenu::createScene() {
+Scene* MainMenuScene::createScene() {
     Scene* scene = Scene::create();
-    TheMenu* layer = TheMenu::create();
+    MainMenuScene* layer = MainMenuScene::create();
     scene->addChild(layer);
     return scene;
 }
 
-bool TheMenu::init() {
+bool MainMenuScene::init() {
     com = new Common(5);
     if (!LayerColor::initWithColor(com->background)) {
         return false;
@@ -58,13 +58,13 @@ bool TheMenu::init() {
     // menu entries
     Label* lbl_start = Label::createWithTTF("START", com->text_font, com->text_size * 1.5);
     lbl_start->enableOutline(Color4B(0, 0, 0, 255), 2);
-    MenuItemLabel* btn_start = MenuItemLabel::create(lbl_start, CC_CALLBACK_0(TheMenu::startGame, this));
+    MenuItemLabel* btn_start = MenuItemLabel::create(lbl_start, CC_CALLBACK_0(MainMenuScene::startGame, this));
     Label* lbl_settings = Label::createWithTTF("SETTINGS", com->text_font, com->text_size);
     lbl_settings->enableOutline(Color4B(0, 0, 0, 255), 2);
-    MenuItemLabel* btn_settings = MenuItemLabel::create(lbl_settings, CC_CALLBACK_0(TheMenu::menuSettingsCallback, this));
+    MenuItemLabel* btn_settings = MenuItemLabel::create(lbl_settings, CC_CALLBACK_0(MainMenuScene::menuSettingsCallback, this));
     Label* lbl_exit = Label::createWithTTF("EXIT", com->text_font, com->text_size);
     lbl_exit->enableOutline(Color4B(0, 0, 0, 255), 2);
-    MenuItemLabel* btn_exit = MenuItemLabel::create(lbl_exit, CC_CALLBACK_1(TheMenu::menuCloseCallback, this));
+    MenuItemLabel* btn_exit = MenuItemLabel::create(lbl_exit, CC_CALLBACK_1(MainMenuScene::menuCloseCallback, this));
     Menu* menu = Menu::createWithArray({ btn_start, btn_settings, btn_exit });
     menu->alignItemsVertically();
 
@@ -106,7 +106,7 @@ bool TheMenu::init() {
     return true;
 }
 
-void TheMenu::update(float dt) {
+void MainMenuScene::update(float dt) {
     deltatime += dt;
     if (sprite_ball != nullptr) {
         float l = com->getBallLength();
@@ -115,7 +115,7 @@ void TheMenu::update(float dt) {
     }
 }
 
-void TheMenu::spanCloud(bool random) {
+void MainMenuScene::spanCloud(bool random) {
     Sprite* cloud = com->spanCloud();
     float cloud_height = this->vorigin.y + ((float)rand() / (float)(RAND_MAX / this->vsize.height));
     float cloud_vel = CLOUD_SPEED_OFFSET + (float)rand() / (float)(RAND_MAX / CLOUD_SPEED);
@@ -132,24 +132,24 @@ void TheMenu::spanCloud(bool random) {
         new_cloud, RemoveSelf::create(), nullptr));
 }
 
-void TheMenu::onEnterTransitionDidFinish() {
+void MainMenuScene::onEnterTransitionDidFinish() {
     this->scheduleUpdate();
 }
 
-void TheMenu::onExitTransitionDidFinish() {
+void MainMenuScene::onExitTransitionDidFinish() {
     this->unscheduleUpdate();
 }
 
-void TheMenu::startGame() {
+void MainMenuScene::startGame() {
 #ifdef SDKBOX_ENABLED
     // sdkbox::PluginAdMob::cache("gameover");
     sdkbox::PluginAdMob::hide("gameover");
 #endif
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
-    Director::getInstance()->replaceScene(TransitionFade::create(0.5, WreckingGame::createScene()));
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5, GameScene::createScene()));
 }
 
-void TheMenu::menuCloseCallback(Ref* pSender) {
+void MainMenuScene::menuCloseCallback(Ref* pSender) {
     CocosDenshion::SimpleAudioEngine::getInstance()->unloadEffect("hit.wav");
     Director::getInstance()->end();
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
@@ -159,7 +159,7 @@ void TheMenu::menuCloseCallback(Ref* pSender) {
 #endif
 }
 
-void TheMenu::menuSettingsCallback() {
+void MainMenuScene::menuSettingsCallback() {
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
     Director::getInstance()->replaceScene(TransitionFade::create(0.5, SettingsScene::createScene()));
 }

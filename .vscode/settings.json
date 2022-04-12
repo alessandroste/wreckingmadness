@@ -1,7 +1,3 @@
 {
-    "cmake.buildDirectory": "${workspaceFolder}/proj.win32/build",
-    "files.associations": {
-        "string": "cpp"
-    },
-    "cmake.buildTask": false
+  "cmake.buildDirectory": "${workspaceFolder}/proj.win32/build"
 }
