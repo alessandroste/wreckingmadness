@@ -4,6 +4,8 @@
 #include "GameScene.h"
 #include "Utilities.h"
 
+using namespace wreckingmadness;
+
 #define CHAIN_DISP 0.17f
 #define SCORE_KEY "poefjowvoavsdpf"
 #define ID_KEY "owqenpsdfopwndsa"
@@ -144,7 +146,7 @@ Node* Common::getEndGameMenu(int score, int top_score) {
     mb_restart->setName("btn_restart");
     Vector<MenuItem*> mbuttons;
     mbuttons.pushBack(mb_exit);
-#ifdef SDKBOX_ENABLED
+#if (SDKBOX && SDKBOX_FACEBOOK)
     MenuItemImage* mb_share = MenuItemImage::create("mb_fb_n.png", "mb_fb_p.png");
     mb_share->setName("btn_share");
     mbuttons.pushBack(mb_share);

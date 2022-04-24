@@ -6,7 +6,7 @@ android {
     compileSdkVersion PROP_COMPILE_SDK_VERSION.toInteger()
 
     defaultConfig {
-        applicationId "org.cocos2dx.hellocpp"
+        applicationId "com.ales.wreckingmadness"
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
         versionCode 1
@@ -14,8 +14,8 @@ android {
 
         externalNativeBuild {
             cmake {
-                targets 'MyGame'
-                arguments "-DCMAKE_FIND_ROOT_PATH=", "-DANDROID_STL=c++_static", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE"
+                targets 'wreckingmadness'
+                arguments "-DCMAKE_FIND_ROOT_PATH=", "-DANDROID_STL=c++_static", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE", "-DSDKBOX="
                 cppFlags "-frtti -fexceptions -fsigned-char"
             }
         }
@@ -40,7 +40,6 @@ android {
     }
 
     signingConfigs {
-
        release {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 storeFile file(RELEASE_STORE_FILE)

@@ -1,14 +1,11 @@
 #include "AppDelegate.h"
 #include "MainMenuScene.h"
+#include "SdkBoxHelper.h"
 #include "Utilities.h"
 #include "editor-support/cocostudio/SimpleAudioEngine.h"
-#ifdef SDKBOX_ENABLED
-#include "pluginadmob/PluginAdMob.h"
-#include "pluginfacebook/PluginFacebook.h"
-#include "sdkbox/Sdkbox.h"
-#endif
 
-USING_NS_CC;
+using namespace cocos2d;
+using namespace wreckingmadness;
 
 static cocos2d::Size designResolutionSize = cocos2d::Size(480, 640);
 static cocos2d::Size smallResolutionSize = cocos2d::Size(480, 640);
@@ -25,7 +22,6 @@ void AppDelegate::initGLContextAttrs() {
     // set OpenGL context attributions,now can only set six attributions:
     // red,green,blue,alpha,depth,stencil
     GLContextAttrs glContextAttrs = { 8, 8, 8, 8, 24, 8 };
-
     GLView::setGLContextAttrs(glContextAttrs);
 }
 
@@ -36,7 +32,6 @@ static int register_all_packages() {
 }
 
 bool AppDelegate::applicationDidFinishLaunching() {
-    // initialize director
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
     if (!glview) {
@@ -73,25 +68,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
 
     register_all_packages();
+    this->setSearchPaths();
+    SdkBoxHelper::Init();
+    this->firebaseHelper = std::unique_ptr<FirebaseHelper>(new FirebaseHelper());
 
-    CCLOG("Content scale factor %f", director->getContentScaleFactor());
-    std::vector<std::string> searchOrder;
-    if (director->getContentScaleFactor() >= 3.0)
-        searchOrder.push_back("4x");
-    if (director->getContentScaleFactor() >= 1.5)
-        searchOrder.push_back("2x");
-    searchOrder.push_back("1x");
-    FileUtils::getInstance()->setSearchPaths(searchOrder);
-
-#ifdef SDKBOX_ENABLED
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    sdkbox::init("a2c6b56453d702eaaf90a7eb6060ff03", "4f6c1a0dd3580a65");
-#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-    sdkbox::init("e4a5357d4990f05c776ac7c6007d59dc", "1dd0f011c6419710", "googleplay");
-#endif
-#endif
-
-    // run
     director->runWithScene(MainMenuScene::createScene());
     return true;
 }
@@ -110,4 +90,16 @@ void AppDelegate::applicationWillEnterForeground() {
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
     if (UserDefault::getInstance()->getBoolForKey("music", true))
         CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+}
+
+void AppDelegate::setSearchPaths() {
+    auto director = cocos2d::Director::getInstance();
+    CCLOG("Content scale factor %f", director->getContentScaleFactor());
+    std::vector<std::string> searchOrder;
+    if (director->getContentScaleFactor() >= 3.0)
+        searchOrder.push_back("4x");
+    if (director->getContentScaleFactor() >= 1.5)
+        searchOrder.push_back("2x");
+    searchOrder.push_back("1x");
+    cocos2d::FileUtils::getInstance()->setSearchPaths(searchOrder);
 }

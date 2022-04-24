@@ -11,7 +11,11 @@ This is a simple game to learn how to use cocos2d-x library to create cross plat
 - Install Android SDK
 - Download ndk-bundle, ndk, build-tools
 - run gradle
-
 # SDKBOX
 - `$env:PYTHONIOENCODING = "UTF-8"`
 - `C:\Tools\Pyportable-2.7.10rc1\python2.exe .\cocos2d\tools\cocos2d-console\plugins\plugin_package\sdkbox.pyc update`
+# Firebase
+- https://firebase.google.com/download/cpp in firebase_cpp_sdk
+
+# To-do
+- https://github.com/firebase/firebase-cpp-sdk

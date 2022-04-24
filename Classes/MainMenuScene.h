@@ -4,16 +4,15 @@
 #include "cocos2d.h"
 #include "GameScene.h"
 
-using namespace cocos2d;
-
 class MainMenuScene : public LayerColor
 {
 private:
     void startGame();
     void update(float dt);
-    Vec2 vorigin;
-    Size vsize;
-    Node* sprite_ball;
+    cocos2d::Vec2 vorigin;
+    cocos2d::Size vsize;
+    cocos2d::Node* sprite_ball;
+    float deltatime;
 public:
     Common* com;
     static Scene* createScene();
@@ -25,7 +24,6 @@ public:
     void onEnterTransitionDidFinish();
     void onExitTransitionDidFinish();
 
-    // implement the "static create()" method manually
     CREATE_FUNC(MainMenuScene);
 };
 

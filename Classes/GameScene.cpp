@@ -2,15 +2,17 @@
 #include "Common.h"
 #include "editor-support/cocostudio/SimpleAudioEngine.h"
 #include "Utilities.h"
-#ifdef SDKBOX_ENABLED
+#ifdef SDKBOX
 #include "pluginadmob/PluginAdMob.h"
-#include "pluginfacebook/PluginFacebook.h"
-#include "FBUtils.h"
 #include "ui\UIEditBox\UIEditBox.h"
 #include "ui\UIImageView.h"
+#ifdef SDKBOX_FACEBOOK
+#include "FacebookListener.h"
+#endif
 #endif
 
-USING_NS_CC;
+using namespace cocos2d;
+using namespace wreckingmadness;
 
 #define VELOCITY 320
 #define MAX_VELOCITY 450.0f
@@ -110,10 +112,12 @@ bool GameScene::init() {
     vel = VELOCITY;
     vel_set = vel;
 
-#ifdef SDKBOX_ENABLED
+#ifdef SDKBOX
     sdkbox::PluginAdMob::init();
     sdkbox::PluginAdMob::cache("gameover");
-    sdkbox::PluginFacebook::setListener(new FBL());
+#ifdef SDKBOX_FACEBOOK
+    sdkbox::PluginFacebook::setListener(new FacebookListener());
+#endif
 #endif
     return true;
 }
@@ -172,15 +176,13 @@ void GameScene::endGame() {
     // menu
     menu_gameend = com->getEndGameMenu(score, com->getTopLocalScore());
     menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_exit")->setCallback(CC_CALLBACK_0(GameScene::closeCallback, this));
-#ifdef SDKBOX_ENABLED
     menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_share")->setCallback(CC_CALLBACK_0(GameScene::shareScore, this));
-#endif
     menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_restart")->setCallback(CC_CALLBACK_0(GameScene::restartGame, this));
     addChild(menu_gameend, 6);
 
     com->sendScore(score);
 
-#ifdef SDKBOX_ENABLED
+#ifdef SDKBOX
     CCLOG("END GAME CHECK AD");
     if (sdkbox::PluginAdMob::isAvailable("gameover"))
         CCLOG("END GAME AD AVAILABLE");
@@ -189,7 +191,7 @@ void GameScene::endGame() {
 }
 
 void GameScene::restartGame() {
-#ifdef SDKBOX_ENABLED
+#ifdef SDKBOX
     sdkbox::PluginAdMob::cache("gameover");
     sdkbox::PluginAdMob::hide("gameover");
 #endif
@@ -245,21 +247,17 @@ void GameScene::update(float dt) {
 
 void GameScene::menuCloseCallback(Ref* pSender) {
     Director::getInstance()->end();
-
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     exit(0);
-#endif
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-
 #endif
 }
 
 void GameScene::afterCaptured(bool succeed, const std::string& outputFile) {
-#ifdef SDKBOX_ENABLED
+#ifdef SDKBOX
     sdkbox::PluginAdMob::show("gameover");
 #endif
     if (succeed) {
-#ifdef SDKBOX_ENABLED
+#if (SDKBOX && SDKBOX_FACEBOOK)
         outfile = outputFile;
         if (!sdkbox::PluginFacebook::isLoggedIn()) {
             sdkbox::PluginFacebook::login();
@@ -276,7 +274,7 @@ void GameScene::afterCaptured(bool succeed, const std::string& outputFile) {
     }
 }
 
-#ifdef SDKBOX_ENABLED
+#if (SDKBOX && SDKBOX_FACEBOOK)
 void GameScene::closeShare() {
     getChildByName("popup")->removeAllChildren();
     getChildByName("popup")->removeFromParent();
@@ -335,7 +333,7 @@ void GameScene::shareDialog() {
 #endif
 
 void GameScene::shareScore() {
-#ifdef SDKBOX_ENABLED
+#ifdef SDKBOX
     sdkbox::PluginAdMob::hide("gameover");
 #endif
     utils::captureScreen(CC_CALLBACK_2(GameScene::afterCaptured, this), SCREEN_FILE);
@@ -410,9 +408,7 @@ void GameScene::playCrashSound(bool metal = false) {
 }
 
 void GameScene::percReceived(float perc) {
-#ifdef COCOS2D_DEBUG
-    cocos2d::log("Percentage received by GAME %f", perc);
-#endif
+    CCLOG("Percentage received by GAME %f", perc);
     if (menu_gameend != nullptr && menu_gameend->getChildByName("spinner") != nullptr) {
         char str[100];
         snprintf(str, sizeof(str), "Better than\n%.2f %%\nof players", perc);
@@ -425,7 +421,7 @@ void GameScene::percReceived(float perc) {
     }
 }
 
-#ifdef SDKBOX_ENABLED
+#if (SDKBOX && SDKBOX_FACEBOOK)
 void GameScene::shareScreen(std::string file, std::string title) {
     sdkbox::FBShareInfo info;
     info.type = sdkbox::FB_PHOTO;
@@ -441,8 +437,7 @@ void GameScene::shareScreen(std::string file, std::string title) {
     spinner->runAction(RepeatForever::create(RotateBy::create(0.1, 2 * M_PI)));
     getChildByName("popup")->addChild(spinner, 15);
 }
-
-#endif // SDKBOX_ENABLED
+#endif
 
 float GameScene::getTimeTick() {
     timeval time;
@@ -490,9 +485,7 @@ void GameScene::removeTop(int dir) {
         if (vel_set < MAX_VELOCITY)
             vel_set += 1.0f / 4;
 
-#ifdef COCOS2D_DEBUG
         CCLOG("Velocity setpoint: %f", vel);
-#endif
     }
 }
 

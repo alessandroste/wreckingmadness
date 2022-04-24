@@ -25,7 +25,26 @@
       },
       "args": [
         "bundle"
-      ]
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "Install Android",
+      "type": "shell",
+      "command": ".\\gradlew",
+      "options": {
+        "cwd": "proj.android"
+      },
+      "args": [
+        "installDebug"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
     },
     {
       "label": "Emulator",
@@ -51,9 +70,9 @@
     {
       "label": "Run game (Windows)",
       "type": "process",
-      "command": "MyGame.exe",
+      "command": "wreckingmadness.exe",
       "options": {
-        "cwd": "${workspaceFolder}\\proj.win32\\build\\bin\\MyGame\\Debug"
+        "cwd": "${workspaceFolder}\\proj.win32\\build\\bin\\wreckingmadness\\Debug"
       },
       "problemMatcher": [],
       "dependsOn": [
@@ -67,7 +86,24 @@
       "args": [
         "--build",
         "${workspaceFolder}\\proj.win32\\build"
-      ]
+      ],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "Forward debug port",
+      "type": "shell",
+      "command": "adb",
+      "args": [
+        "forward",
+        "tcp:5039",
+        "tcp:5039"
+      ],
+      "presentation": {
+        "reveal": "never"
+      },
+      "problemMatcher": []
     }
   ]
 }

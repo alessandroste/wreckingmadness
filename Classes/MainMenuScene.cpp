@@ -1,14 +1,12 @@
 #include "MainMenuScene.h"
 #include "GameScene.h"
 #include "Common.h"
+#include "SdkBoxHelper.h"
 #include "SettingsScene.h"
 #include "editor-support/cocostudio/SimpleAudioEngine.h"
-#ifdef SDKBOX_ENABLED
-#include "pluginadmob/PluginAdMob.h"
-#include "pluginfacebook/PluginFacebook.h"
-#endif
 
-USING_NS_CC;
+using namespace cocos2d;
+using namespace wreckingmadness;
 
 #define BALL_ANGLE 15
 #define BALL_SPEED 10
@@ -16,29 +14,6 @@ USING_NS_CC;
 #define CLOUD_NUM 20
 #define CLOUD_SPEED 20
 #define CLOUD_SPEED_OFFSET 10
-
-float deltatime;
-
-#ifdef SDKBOX_ENABLED
-class ADListener : public sdkbox::AdMobListener
-{
-private:
-    virtual void adViewDidReceiveAd(const std::string& name) {
-        if (name == "gameover")
-            sdkbox::PluginAdMob::show("gameover");
-        CCLOG("AD RECEIVED");
-    }
-    virtual void adViewDidFailToReceiveAdWithError(const std::string& name, const std::string& msg) {}
-    virtual void adViewWillPresentScreen(const std::string& name) {}
-    virtual void adViewDidDismissScreen(const std::string& name) {}
-    virtual void adViewWillDismissScreen(const std::string& name) {
-        if (name == "gameover")
-            sdkbox::PluginAdMob::cache("gameover");
-        CCLOG("AD DISMISSED");
-    }
-    virtual void adViewWillLeaveApplication(const std::string& name) {}
-};
-#endif
 
 Scene* MainMenuScene::createScene() {
     Scene* scene = Scene::create();
@@ -95,14 +70,7 @@ bool MainMenuScene::init() {
     if (UserDefault::getInstance()->getBoolForKey("music", 1) && !CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
         CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("wreckingsound.wav", true);
 
-#ifdef SDKBOX_ENABLED
-    sdkbox::PluginAdMob::init();
-    sdkbox::PluginAdMob::cache("gameover");
-    CCLOG("ADMOB INITIALIZED MENU");
-    sdkbox::PluginAdMob::setListener(new ADListener());
-    sdkbox::PluginFacebook::init();
-#endif
-
+    wreckingmadness::SdkBoxHelper::PluginInit();
     return true;
 }
 
@@ -141,8 +109,7 @@ void MainMenuScene::onExitTransitionDidFinish() {
 }
 
 void MainMenuScene::startGame() {
-#ifdef SDKBOX_ENABLED
-    // sdkbox::PluginAdMob::cache("gameover");
+#ifdef SDKBOX
     sdkbox::PluginAdMob::hide("gameover");
 #endif
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
@@ -154,8 +121,6 @@ void MainMenuScene::menuCloseCallback(Ref* pSender) {
     Director::getInstance()->end();
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     exit(0);
-#endif
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 #endif
 }
 

@@ -24,16 +24,9 @@
 # ****************************************************************************/
 cmake_minimum_required(VERSION 3.6)
 
-set(APP_NAME MyGame)
+set(APP_NAME wreckingmadness)
 
 project(${APP_NAME})
-
-# set(SDKBOX ON) # To be removed
-
-if (DEFINED SDKBOX)
-    message(STATUS "Using SDKBOX")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDKBOX_ENABLED")
-endif()
 
 if(XCODE)
     if(NOT DEFINED CMAKE_XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET)
@@ -53,44 +46,23 @@ endif()
 set(GAME_SOURCE)
 set(GAME_HEADER)
 
-set(GAME_RES_FOLDER
-    "${CMAKE_CURRENT_SOURCE_DIR}/Resources"
-    )
+set(GAME_RES_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/Resources")
 if(APPLE OR WINDOWS)
     cocos_mark_multi_resources(common_res_files RES_TO "Resources" FOLDERS ${GAME_RES_FOLDER})
 endif()
 
 # add cross-platforms source files and header files 
-list(APPEND GAME_SOURCE
-    Classes/AppDelegate.cpp
-    Classes/Building.cpp
-    Classes/Common.cpp
-    Classes/FBUtils.cpp
-    Classes/Floor.cpp
-    Classes/GameScene.cpp
-    Classes/MainMenuScene.cpp
-    Classes/MD5.cpp
-    Classes/SettingsScene.cpp
-    Classes/Utilities.cpp
-)
-list(APPEND GAME_HEADER
-    Classes/AppDelegate.h
-    Classes/Building.h
-    Classes/Common.h
-    Classes/FBUtils.h
-    Classes/Floor.h
-    Classes/GameScene.h
-    Classes/MainMenuScene.h
-    Classes/MD5.h
-    Classes/SettingsScene.h
-    Classes/Utilities.h
-)
+file(GLOB CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.cpp")
+list(APPEND GAME_SOURCE ${CPP_FILES})
+
+file(GLOB H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.h")
+list(APPEND GAME_HEADER ${H_FILES})
 
 if(ANDROID)
     # change APP_NAME to the share library name for Android, it's value depend on AndroidManifest.xml
-    set(APP_NAME MyGame)
+    set(APP_NAME wreckingmadness)
     list(APPEND GAME_SOURCE
-        proj.android/app/jni/hellocpp/main.cpp
+        proj.android/app/jni/wreckingmadness/main.cpp
     )
 elseif(LINUX)
     list(APPEND GAME_SOURCE
@@ -130,15 +102,15 @@ elseif(APPLE)
             proj.ios_mac/mac/Info.plist
             )
         list(APPEND GAME_SOURCE
-             proj.ios_mac/mac/main.cpp
-             proj.ios_mac/mac/Prefix.pch
-             ${APP_UI_RES}
-             )
+            proj.ios_mac/mac/main.cpp
+            proj.ios_mac/mac/Prefix.pch
+            ${APP_UI_RES}
+            )
     endif()
     list(APPEND GAME_SOURCE ${common_res_files})
 endif()
 
-# mark app complie info and libs info
+# mark app compile info and libs info
 set(all_code_files
     ${GAME_HEADER}
     ${GAME_SOURCE}
@@ -180,3 +152,14 @@ if(LINUX OR WINDOWS)
     cocos_get_resource_path(APP_RES_DIR ${APP_NAME})
     cocos_copy_target_res(${APP_NAME} LINK_TO ${APP_RES_DIR} FOLDERS ${GAME_RES_FOLDER})
 endif()
+
+# set(SDKBOX ON) # To be removed
+if (DEFINED SDKBOX)
+    message(STATUS "Using SDKBOX")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDKBOX")
+endif()
+
+# set(MSVC_RUNTIME_MODE MD)
+# add_subdirectory(firebase_cpp_sdk)
+# target_link_libraries(${APP_NAME} firebase_app firebase_admob)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFIREBASE")

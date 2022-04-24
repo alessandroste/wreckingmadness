@@ -1,22 +1,22 @@
 {
-    "android" : {
-        "Facebook" : {
-            "enabled" : true,
-            "debug" : false,
-            "facebook_id" : "479514052242691"
-        },
-        "AdMob" : {
-            "enabled" : true,
-            "test" : false,
-            "ads" : {
-                "gameover" : {
-                    "id" : "ca-app-pub-5982841410553202\/5078802412",
-                    "type" : "banner",
-                    "alignment" : "bottom",
-                    "width" : 0,
-                    "height" : 0
-                }
-            }
+  "android": {
+    "Facebook": {
+      "enabled": false,
+      "debug": false,
+      "facebook_id": "479514052242691"
+    },
+    "AdMob": {
+      "enabled": true,
+      "test": true,
+      "ads": {
+        "gameover": {
+          "id": "ca-app-pub-5982841410553202\/5078802412",
+          "type": "banner",
+          "alignment": "bottom",
+          "width": 0,
+          "height": 0
         }
+      }
     }
+  }
 }

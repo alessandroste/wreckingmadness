@@ -77,14 +77,13 @@ public:
     // score
     void percReceived(float perc);
 
-#ifdef SDKBOX_ENABLED
+#if (SDKBOX && SDKBOX_FACEBOOK)
     void shareScreen(std::string file, std::string title);
     void closeShare();
     void checkPostPerm();
     void shareDialog();
 #endif
 
-    // implement the "static create()" method manually
     CREATE_FUNC(GameScene);
 };
 

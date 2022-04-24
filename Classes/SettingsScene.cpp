@@ -2,10 +2,15 @@
 #include "Common.h"
 #include "MainMenuScene.h"
 #include "editor-support/cocostudio/SimpleAudioEngine.h"
-#ifdef SDKBOX_ENABLED
-#include "pluginfacebook/PluginFacebook.h"
+#include "SdkBoxHelper.h"
+#ifdef SDKBOX
 #include "pluginadmob/PluginAdMob.h"
+#ifdef SDKBOX_FACEBOOK
+#include "pluginfacebook/PluginFacebook.h"
 #endif
+#endif
+
+using namespace wreckingmadness;
 
 Scene* SettingsScene::createScene() {
     Scene* scene = Scene::create();
@@ -30,7 +35,7 @@ bool SettingsScene::init() {
     vsize = Director::getInstance()->getVisibleSize();
     vorigin = Director::getInstance()->getVisibleOrigin();
 
-#ifdef SDKBOX_ENABLED
+#if (SDKBOX && SDKBOX_FACEBOOK)
     sdkbox::PluginFacebook::init();
     if (sdkbox::PluginFacebook::isLoggedIn()) {
         Label* lbl_logout = Label::createWithTTF("facebook\nlogout", com->text_font, com->text_size / 1.5);
@@ -42,7 +47,6 @@ bool SettingsScene::init() {
         addChild(menu);
     }
 #endif
-
     std::string credits = "wrecking madness is a simple game written in C++ thanks to the awesome cocos2dx library.\n";
     credits.append("Many free resources have been used, credits to kenney.nl for sprites (some retouched).");
 
@@ -69,17 +73,14 @@ bool SettingsScene::init() {
     return true;
 }
 
-#ifdef SDKBOX_ENABLED
 void SettingsScene::logoutCallback() {
-    if (sdkbox::PluginFacebook::isLoggedIn()) {
-        sdkbox::PluginFacebook::logout();
-        com->makeToast("Logging out", 2, this);
+    if (SdkBoxHelper::FacebookLogout()) {
+        com->makeToast("Logged out", 2, this);
     }
     else {
         com->makeToast("Already logged out", 2, this);
     }
 }
-#endif
 
 void SettingsScene::onEnterTransitionDidFinish() {
     scheduleUpdate();
@@ -90,7 +91,7 @@ void SettingsScene::onExitTransitionDidFinish() {
 }
 
 void SettingsScene::update(float dt) {
-#ifdef SDKBOX_ENABLED
+#ifdef SDKBOX
     sdkbox::PluginAdMob::hide("gameover");
 #endif
 }

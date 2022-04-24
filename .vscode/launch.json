@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Android Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/tmp/gdbclient-binary-8658",
+      "cwd": "${workspaceRoot}",
+      "miDebuggerServerAddress": "localhost:5039",
+      "setupCommands": [
+        {
+          "description": "Abilita la riformattazione per gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "windows": {
+        "MIMode": "gdb",
+        "miDebuggerPath": "${env:ANDROID_SDK_ROOT}\\ndk-bundle\\prebuilt\\windows-x86_64\\bin\\gdb.exe"
+      }
+    },
+    {
+      "name": "Launch",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "wreckingmadness.exe",
+      "cwd": "${workspaceFolder}\\proj.win32\\build\\bin\\wreckingmadness\\Debug",
+      "environment": [],
+      "console": "internalConsole",
+      "preLaunchTask": "Build (Windows)",
+      "symbolOptions": {
+        "searchPaths": [
+          "${workspaceFolder}\\proj.win32\\build\\bin\\wreckingmadness\\Debug"
+        ],
+        "searchMicrosoftSymbolServer": false
+      }
+    },
+    {
+      "name": "Attach",
+      "type": "cppvsdbg",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    }
+  ]
+}

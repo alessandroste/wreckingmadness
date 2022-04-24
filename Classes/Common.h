@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
@@ -44,6 +43,4 @@ public:
     void makeToast(std::string text, float duration, Layer* scene);
 };
 
-
-#endif // !_COMMON_H_
-
+#endif // _COMMON_H_
