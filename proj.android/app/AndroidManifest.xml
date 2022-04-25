@@ -1,18 +1,28 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.ales.wreckingmadness" android:installLocation="auto">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ales.wreckingmadness"
+    android:installLocation="auto">
     <uses-feature android:glEsVersion="0x00020000" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
-        hardwareAccelerated="true"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/icon_wm"
         android:label="@string/app_name">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-5982841410553202~6695136411" />
         <meta-data
             android:name="android.app.lib_name"
             android:value="wreckingmadness" />
         <activity
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
-            android:label="@string/app_name"
             android:name="com.ales.wreckingmadness.AppActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
@@ -22,9 +32,4 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
 </manifest>

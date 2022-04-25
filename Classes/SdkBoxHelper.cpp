@@ -1,57 +1,71 @@
+#include "cocos2d.h"
 #include "SdkBoxHelper.h"
-#ifdef SDKBOX
+#ifdef SDKBOX_ENABLED
 #include "sdkbox/Sdkbox.h"
+#include "PluginAdMob/PluginAdMob.h"
+#include "AdListener.h"
 #endif
 
-void wreckingmadness::SdkBoxHelper::Init() {
-#ifdef SDKBOX
-    CCLOG("Sandbox enabled");
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    // sdkbox::init("a2c6b56453d702eaaf90a7eb6060ff03", "4f6c1a0dd3580a65");
-#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-    // sdkbox::init("e4a5357d4990f05c776ac7c6007d59dc", "1dd0f011c6419710", "googleplay");
-#endif
+using namespace cocos2d;
+using namespace wreckingmadness;
+
+std::string SdkBoxHelper::AdTypeString(AdType adType) {
+    switch (adType) {
+        case AdType::GAMEOVER:
+            return "gameover";
+        default:
+            throw new std::exception();
+    }
+}
+
+void SdkBoxHelper::CloseAd(AdType adType) {
+    auto adTypeName = AdTypeString(adType);
+#ifdef SDKBOX_ENABLED
+    sdkbox::PluginAdMob::hide(adTypeName);
 #endif
 }
 
-#ifdef SDKBOX
-class ADListener : public sdkbox::AdMobListener
-{
-private:
-    virtual void adViewDidReceiveAd(const std::string& name) {
-        if (name == "gameover")
-            sdkbox::PluginAdMob::show("gameover");
-        CCLOG("AD RECEIVED");
-    }
-    virtual void adViewDidFailToReceiveAdWithError(const std::string& name, const std::string& msg) {}
-    virtual void adViewWillPresentScreen(const std::string& name) {}
-    virtual void adViewDidDismissScreen(const std::string& name) {}
-    virtual void adViewWillDismissScreen(const std::string& name) {
-        if (name == "gameover")
-            sdkbox::PluginAdMob::cache("gameover");
-        CCLOG("AD DISMISSED");
-    }
-    virtual void adViewWillLeaveApplication(const std::string& name) {}
-};
+void SdkBoxHelper::CacheAd(AdType adType) {
+    auto adTypeName = AdTypeString(adType);
+#ifdef SDKBOX_ENABLED
+    sdkbox::PluginAdMob::cache(adTypeName);
 #endif
+}
+
+void SdkBoxHelper::ShowAd(AdType adType) {
+    auto adTypeName = AdTypeString(adType);
+#ifdef SDKBOX_ENABLED
+    if (sdkbox::PluginAdMob::isAvailable(adTypeName)) {
+        CCLOG("[SdkBoxHelper] Showing ad %s", adTypeName.c_str());
+        sdkbox::PluginAdMob::show(adTypeName);
+    }
+#endif
+}
+
+void wreckingmadness::SdkBoxHelper::Init() {
+#ifdef SDKBOX_ENABLED
+    CCLOG("[SdkBoxHelper] SdkBox enabled");
+#endif
+}
 
 void wreckingmadness::SdkBoxHelper::PluginInit() {
-#ifdef SDKBOX
+#ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::init();
     sdkbox::PluginAdMob::cache("gameover");
-    sdkbox::PluginAdMob::setListener(new ADListener());
-    CCLOG("ADMOB INITIALIZED MENU");
+    sdkbox::PluginAdMob::setListener(new AdListener());
+    CCLOG("[SdkBoxHelper] Initialized AdMob");
+#ifdef SDKBOX_FACEBOOK
     sdkbox::PluginFacebook::init();
+#endif
 #endif
 }
 
 bool wreckingmadness::SdkBoxHelper::FacebookLogout() {
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
     if (sdkbox::PluginFacebook::isLoggedIn()) {
         sdkbox::PluginFacebook::logout();
         return true;
     }
 #endif
-
     return false;
 }

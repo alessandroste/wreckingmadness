@@ -1,5 +1,3 @@
-import org.gradle.internal.os.OperatingSystem
-
 apply plugin: 'com.android.application'
 
 android {
@@ -15,7 +13,7 @@ android {
         externalNativeBuild {
             cmake {
                 targets 'wreckingmadness'
-                arguments "-DCMAKE_FIND_ROOT_PATH=", "-DANDROID_STL=c++_static", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE", "-DSDKBOX="
+                arguments "-DCMAKE_FIND_ROOT_PATH=", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_STL=c++_static"
                 cppFlags "-frtti -fexceptions -fsigned-char"
             }
         }
@@ -53,8 +51,6 @@ android {
     buildTypes {
         release {
             debuggable false
-            jniDebuggable false
-            renderscriptDebuggable false
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -62,17 +58,12 @@ android {
                 signingConfig signingConfigs.release
             }
         }
-
-        debug {
-            debuggable true
-            jniDebuggable true
-            renderscriptDebuggable true
-        }
     }
+    
+    ndkVersion '24.0.8215888'
 }
 
 android.applicationVariants.all { variant ->
-    def project_root_folder = "${projectDir}/../.."
     def dest_assets_folder = "${projectDir}/assets"
 
     // delete previous files first
@@ -92,5 +83,9 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':libcocos2dx')
+    api project(':libcocos2dx')
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-ads:20.6.0'
 }

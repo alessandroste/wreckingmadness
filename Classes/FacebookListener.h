@@ -1,7 +1,7 @@
-#ifndef __FB_UTILS_H__
-#define __FB_UTILS_H__
+#ifndef __FACEBOOKLISTENER_H__
+#define __FACEBOOKLISTENER_H__
 
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
 #include "sdkbox/Sdkbox.h"
 #include "pluginfacebook/PluginFacebook.h"
 
@@ -22,6 +22,5 @@ namespace wreckingmadness {
         void onGetUserInfo(const sdkbox::FBGraphUser& userInfo);
     };
 }
-
 #endif
 #endif

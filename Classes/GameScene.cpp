@@ -1,11 +1,12 @@
 #include "GameScene.h"
 #include "Common.h"
-#include "editor-support/cocostudio/SimpleAudioEngine.h"
 #include "Utilities.h"
-#ifdef SDKBOX
-#include "pluginadmob/PluginAdMob.h"
+#include "SdkBoxHelper.h"
+#include "editor-support/cocostudio/SimpleAudioEngine.h"
 #include "ui\UIEditBox\UIEditBox.h"
 #include "ui\UIImageView.h"
+#ifdef SDKBOX_ENABLED
+#include "pluginadmob/PluginAdMob.h"
 #ifdef SDKBOX_FACEBOOK
 #include "FacebookListener.h"
 #endif
@@ -34,9 +35,8 @@ Scene* GameScene::createScene() {
 }
 
 bool GameScene::init() {
-    // utilities
     ptr = this;
-    srand(time(NULL));
+    srand(time(nullptr));
     com = new Common(30);
 
     // layer init
@@ -112,7 +112,7 @@ bool GameScene::init() {
     vel = VELOCITY;
     vel_set = vel;
 
-#ifdef SDKBOX
+#ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::init();
     sdkbox::PluginAdMob::cache("gameover");
 #ifdef SDKBOX_FACEBOOK
@@ -176,25 +176,17 @@ void GameScene::endGame() {
     // menu
     menu_gameend = com->getEndGameMenu(score, com->getTopLocalScore());
     menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_exit")->setCallback(CC_CALLBACK_0(GameScene::closeCallback, this));
-    menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_share")->setCallback(CC_CALLBACK_0(GameScene::shareScore, this));
+    //menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_share")->setCallback(CC_CALLBACK_0(GameScene::shareScore, this));
     menu_gameend->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_restart")->setCallback(CC_CALLBACK_0(GameScene::restartGame, this));
     addChild(menu_gameend, 6);
 
-    com->sendScore(score);
-
-#ifdef SDKBOX
-    CCLOG("END GAME CHECK AD");
-    if (sdkbox::PluginAdMob::isAvailable("gameover"))
-        CCLOG("END GAME AD AVAILABLE");
-    sdkbox::PluginAdMob::show("gameover");
-#endif
+    //com->sendScore(score);
+    SdkBoxHelper::ShowAd(AdType::GAMEOVER);
+    this->percReceived(100.0);
 }
 
 void GameScene::restartGame() {
-#ifdef SDKBOX
-    sdkbox::PluginAdMob::cache("gameover");
-    sdkbox::PluginAdMob::hide("gameover");
-#endif
+    SdkBoxHelper::CloseAd(AdType::GAMEOVER);
     Scene* newScene = GameScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5, newScene));
 }
@@ -253,11 +245,11 @@ void GameScene::menuCloseCallback(Ref* pSender) {
 }
 
 void GameScene::afterCaptured(bool succeed, const std::string& outputFile) {
-#ifdef SDKBOX
+#ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::show("gameover");
 #endif
     if (succeed) {
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
         outfile = outputFile;
         if (!sdkbox::PluginFacebook::isLoggedIn()) {
             sdkbox::PluginFacebook::login();
@@ -274,7 +266,7 @@ void GameScene::afterCaptured(bool succeed, const std::string& outputFile) {
     }
 }
 
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
 void GameScene::closeShare() {
     getChildByName("popup")->removeAllChildren();
     getChildByName("popup")->removeFromParent();
@@ -333,7 +325,7 @@ void GameScene::shareDialog() {
 #endif
 
 void GameScene::shareScore() {
-#ifdef SDKBOX
+#ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::hide("gameover");
 #endif
     utils::captureScreen(CC_CALLBACK_2(GameScene::afterCaptured, this), SCREEN_FILE);
@@ -347,7 +339,7 @@ void GameScene::spanCloud(bool random) {
     float cloud_space = vsize.width + cloud_width * 2;
     float cloud_x = vorigin.x + vsize.width + cloud_width;
     if (random)
-        cloud_x = vorigin.x + ((float)rand() / (float)(RAND_MAX / vsize.width));
+        cloud_x = vorigin.x + ((float)rand() / (RAND_MAX / vsize.width));
     cloud->setPosition(Vec2(cloud_x, cloud_height));
     addChild(cloud, 1);
     CallFunc* new_cloud = CallFunc::create([this]()
@@ -421,7 +413,7 @@ void GameScene::percReceived(float perc) {
     }
 }
 
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
 void GameScene::shareScreen(std::string file, std::string title) {
     sdkbox::FBShareInfo info;
     info.type = sdkbox::FB_PHOTO;

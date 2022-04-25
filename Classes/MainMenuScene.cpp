@@ -109,9 +109,7 @@ void MainMenuScene::onExitTransitionDidFinish() {
 }
 
 void MainMenuScene::startGame() {
-#ifdef SDKBOX
-    sdkbox::PluginAdMob::hide("gameover");
-#endif
+    SdkBoxHelper::CloseAd(AdType::GAMEOVER);
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("hit.wav");
     Director::getInstance()->replaceScene(TransitionFade::create(0.5, GameScene::createScene()));
 }

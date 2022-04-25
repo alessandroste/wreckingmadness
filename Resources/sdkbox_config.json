@@ -8,6 +8,7 @@
     "AdMob": {
       "enabled": true,
       "test": true,
+      "appid": "ca-app-pub-5982841410553202~6695136411",
       "ads": {
         "gameover": {
           "id": "ca-app-pub-5982841410553202\/5078802412",

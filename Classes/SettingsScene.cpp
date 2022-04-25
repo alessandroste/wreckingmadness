@@ -3,7 +3,7 @@
 #include "MainMenuScene.h"
 #include "editor-support/cocostudio/SimpleAudioEngine.h"
 #include "SdkBoxHelper.h"
-#ifdef SDKBOX
+#ifdef SDKBOX_ENABLED
 #include "pluginadmob/PluginAdMob.h"
 #ifdef SDKBOX_FACEBOOK
 #include "pluginfacebook/PluginFacebook.h"
@@ -35,7 +35,7 @@ bool SettingsScene::init() {
     vsize = Director::getInstance()->getVisibleSize();
     vorigin = Director::getInstance()->getVisibleOrigin();
 
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
     sdkbox::PluginFacebook::init();
     if (sdkbox::PluginFacebook::isLoggedIn()) {
         Label* lbl_logout = Label::createWithTTF("facebook\nlogout", com->text_font, com->text_size / 1.5);
@@ -91,7 +91,7 @@ void SettingsScene::onExitTransitionDidFinish() {
 }
 
 void SettingsScene::update(float dt) {
-#ifdef SDKBOX
+#ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::hide("gameover");
 #endif
 }

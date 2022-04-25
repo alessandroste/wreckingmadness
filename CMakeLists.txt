@@ -59,7 +59,7 @@ file(GLOB H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.h")
 list(APPEND GAME_HEADER ${H_FILES})
 
 if(ANDROID)
-    # change APP_NAME to the share library name for Android, it's value depend on AndroidManifest.xml
+    # change APP_NAME to the shared library name for Android, its value depend on AndroidManifest.xml
     set(APP_NAME wreckingmadness)
     list(APPEND GAME_SOURCE
         proj.android/app/jni/wreckingmadness/main.cpp
@@ -111,10 +111,7 @@ elseif(APPLE)
 endif()
 
 # mark app compile info and libs info
-set(all_code_files
-    ${GAME_HEADER}
-    ${GAME_SOURCE}
-    )
+set(all_code_files ${GAME_HEADER} ${GAME_SOURCE})
 if(NOT ANDROID)
     add_executable(${APP_NAME} ${all_code_files})
 else()
@@ -153,13 +150,17 @@ if(LINUX OR WINDOWS)
     cocos_copy_target_res(${APP_NAME} LINK_TO ${APP_RES_DIR} FOLDERS ${GAME_RES_FOLDER})
 endif()
 
-# set(SDKBOX ON) # To be removed
-if (DEFINED SDKBOX)
-    message(STATUS "Using SDKBOX")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDKBOX")
+if(ANDROID)
+    add_definitions(-DSDKBOX_ENABLED)
+    
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/jni/PluginAdMob)
+    target_link_libraries(${APP_NAME} ext_PluginAdMob)
+
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/jni/sdkbox)
+    target_link_libraries(${APP_NAME} ext_sdkbox)
 endif()
 
 # set(MSVC_RUNTIME_MODE MD)
 # add_subdirectory(firebase_cpp_sdk)
 # target_link_libraries(${APP_NAME} firebase_app firebase_admob)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFIREBASE")
+# add_definitions(-DFIREBASE)

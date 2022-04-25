@@ -77,7 +77,7 @@ public:
     // score
     void percReceived(float perc);
 
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
     void shareScreen(std::string file, std::string title);
     void closeShare();
     void checkPostPerm();

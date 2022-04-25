@@ -1,4 +1,4 @@
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
 #include "FacebookListener.h"
 #include "cocos2d.h"
 #include "GameScene.h"

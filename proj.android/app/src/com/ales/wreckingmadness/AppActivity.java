@@ -25,10 +25,8 @@ THE SOFTWARE.
 package com.ales.wreckingmadness;
 
 import android.os.Bundle;
-import org.cocos2dx.lib.Cocos2dxActivity;
 import android.os.Build;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 
 public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
     @Override
@@ -50,6 +48,5 @@ public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             getWindow().setAttributes(lp);
         }
-        // DO OTHER INITIALIZATION BELOW   
     }
 }

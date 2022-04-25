@@ -7,14 +7,14 @@
 using namespace cocos2d;
 using namespace wreckingmadness;
 
-static cocos2d::Size designResolutionSize = cocos2d::Size(480, 640);
-static cocos2d::Size smallResolutionSize = cocos2d::Size(480, 640);
-static cocos2d::Size mediumResolutionSize = cocos2d::Size(960, 1280);
-static cocos2d::Size largeResolutionSize = cocos2d::Size(1920, 2560);
+static auto designResolutionSize = cocos2d::Size(480, 640);
+static auto smallResolutionSize = cocos2d::Size(480, 640);
+static auto mediumResolutionSize = cocos2d::Size(960, 1280);
+static auto largeResolutionSize = cocos2d::Size(1920, 2560);
 
-AppDelegate::AppDelegate() {}
+AppDelegate::AppDelegate() {};
 
-AppDelegate::~AppDelegate() {}
+AppDelegate::~AppDelegate() {};
 
 // if you want a different context,just modify the value of glContextAttrs
 // it will takes effect on all platforms
@@ -33,27 +33,22 @@ static int register_all_packages() {
 
 bool AppDelegate::applicationDidFinishLaunching() {
     auto director = Director::getInstance();
-    auto glview = director->getOpenGLView();
-    if (!glview) {
+    auto glView = director->getOpenGLView();
+    if (!glView) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-        glview = GLViewImpl::createWithRect("WreckingMadness", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
+        glView = GLViewImpl::createWithRect("WreckingMadness", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
-        glview = GLViewImpl::create("WreckingMadness");
+        glView = GLViewImpl::create("WreckingMadness");
 #endif
-        director->setOpenGLView(glview);
+        director->setOpenGLView(glView);
     }
-
-    // turn on display FPS
-#ifdef COCOS2D_DEBUG
-    director->setDisplayStats(true);
-#endif
 
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval((float)1.0 / 60);
 
     // Set the design resolution
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
-    Size frameSize = glview->getFrameSize();
+    glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
+    Size frameSize = glView->getFrameSize();
     // if the frame's height is larger than the height of medium size.
     if (frameSize.height > mediumResolutionSize.height) {
         director->setContentScaleFactor(MIN(largeResolutionSize.height / designResolutionSize.height, largeResolutionSize.width / designResolutionSize.width));
@@ -68,9 +63,13 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
 
     register_all_packages();
-    this->setSearchPaths();
+    setSearchPaths();
+
+#ifdef COCOS2D_DEBUG
+    director->setDisplayStats(true);
+#endif
+    
     SdkBoxHelper::Init();
-    this->firebaseHelper = std::unique_ptr<FirebaseHelper>(new FirebaseHelper());
 
     director->runWithScene(MainMenuScene::createScene());
     return true;
@@ -91,15 +90,15 @@ void AppDelegate::applicationWillEnterForeground() {
     if (UserDefault::getInstance()->getBoolForKey("music", true))
         CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
-
+ 
 void AppDelegate::setSearchPaths() {
     auto director = cocos2d::Director::getInstance();
     CCLOG("Content scale factor %f", director->getContentScaleFactor());
     std::vector<std::string> searchOrder;
     if (director->getContentScaleFactor() >= 3.0)
-        searchOrder.push_back("4x");
+        searchOrder.emplace_back("4x");
     if (director->getContentScaleFactor() >= 1.5)
-        searchOrder.push_back("2x");
-    searchOrder.push_back("1x");
+        searchOrder.emplace_back("2x");
+    searchOrder.emplace_back("1x");
     cocos2d::FileUtils::getInstance()->setSearchPaths(searchOrder);
 }

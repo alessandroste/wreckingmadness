@@ -8,7 +8,6 @@ using namespace wreckingmadness;
 
 #define CHAIN_DISP 0.17f
 #define SCORE_KEY "poefjowvoavsdpf"
-#define ID_KEY "owqenpsdfopwndsa"
 #define API_LOC "http://aleste.heavybeard.it/wm_services/"
 #define GID_LOC "GetPlayerID.php"
 #define UPD_LOC "UpdateScore.php"
@@ -146,7 +145,7 @@ Node* Common::getEndGameMenu(int score, int top_score) {
     mb_restart->setName("btn_restart");
     Vector<MenuItem*> mbuttons;
     mbuttons.pushBack(mb_exit);
-#if (SDKBOX && SDKBOX_FACEBOOK)
+#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
     MenuItemImage* mb_share = MenuItemImage::create("mb_fb_n.png", "mb_fb_p.png");
     mb_share->setName("btn_share");
     mbuttons.pushBack(mb_share);
@@ -184,23 +183,25 @@ void Common::sendScore(unsigned int score) {
 }
 
 bool Common::getPlayerID() {
-    if (UserDefault::getInstance()->getIntegerForKey("playerid", -1) != -1) return true;
-    else if (!requesting) {
-        network::HttpRequest* httpc = new network::HttpRequest();
-        std::string url = API_LOC;
-        url.append(GID_LOC);
-        url.append("?hash=");
-        url.append(md5(ID_KEY));
-        CCLOG("Requesting a new ID from %s", url.c_str());
-        httpc->setUrl(url);
-        httpc->setRequestType(network::HttpRequest::Type::GET);
-        httpc->setResponseCallback(CC_CALLBACK_2(Common::onHttpRequestCompleted, this));
-        cocos2d::network::HttpClient::getInstance()->send(httpc);
-        requesting = true;
-        httpc->release();
-        return false;
-    }
-    else return false;
+//    if (UserDefault::getInstance()->getIntegerForKey("playerid", -1) != -1)
+//        return true;
+//    else if (!requesting) {
+//        network::HttpRequest* httpc = new network::HttpRequest();
+//        std::string url = API_LOC;
+//        url.append(GID_LOC);
+//        url.append("?hash=");
+//        url.append(md5(ID_KEY));
+//        CCLOG("Requesting a new ID from %s", url.c_str());
+//        httpc->setUrl(url);
+//        httpc->setRequestType(network::HttpRequest::Type::GET);
+//        httpc->setResponseCallback(CC_CALLBACK_2(Common::onHttpRequestCompleted, this));
+//        cocos2d::network::HttpClient::getInstance()->send(httpc);
+//        requesting = true;
+//        httpc->release();
+//        return false;
+//    }
+//    else return false;
+return true;
 }
 
 void Common::onHttpRequestCompleted(cocos2d::network::HttpClient* sender, cocos2d::network::HttpResponse* response) {

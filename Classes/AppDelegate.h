@@ -13,7 +13,7 @@ class  AppDelegate : private cocos2d::Application
 {
 private:
     std::unique_ptr<wreckingmadness::FirebaseHelper> firebaseHelper;
-    void setSearchPaths();
+    static void setSearchPaths();
 public:
     AppDelegate();
     virtual ~AppDelegate();

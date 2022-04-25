@@ -19,8 +19,6 @@ public:
     float credits_size = 25.0f;
     Color3B playernamecolor;
     Color4B playernamecolor_dark;
-
-    // constructor and deconstructor
     Common(unsigned int chain_length = 20);
     ~Common();
 
