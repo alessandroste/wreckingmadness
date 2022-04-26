@@ -14,7 +14,7 @@ std::string SdkBoxHelper::AdTypeString(AdType adType) {
         case AdType::GAMEOVER:
             return "gameover";
         default:
-            throw new std::exception();
+            throw std::exception();
     }
 }
 
@@ -51,7 +51,6 @@ void wreckingmadness::SdkBoxHelper::Init() {
 void wreckingmadness::SdkBoxHelper::PluginInit() {
 #ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::init();
-    sdkbox::PluginAdMob::cache("gameover");
     sdkbox::PluginAdMob::setListener(new AdListener());
     CCLOG("[SdkBoxHelper] Initialized AdMob");
 #ifdef SDKBOX_FACEBOOK

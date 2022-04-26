@@ -26,9 +26,13 @@
 #include <jni.h>
 
 #include "AppDelegate.h"
+#include "PlatformAbstraction.h"
+#include "androidPlatform.h"
 
 #define  LOG_TAG    "main"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+
+using namespace wreckingmadness;
 
 namespace {
     std::unique_ptr<AppDelegate> appDelegate;
@@ -36,8 +40,6 @@ namespace {
 
 void cocos_android_app_init(JNIEnv* env) {
     LOGD("cocos_android_app_init");
-#ifdef SANDBOX
-    LOGD("Sandbox enabled");
-#endif
+    AndroidPlatform platform;
     appDelegate.reset(new AppDelegate());
 }

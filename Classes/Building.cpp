@@ -1,6 +1,8 @@
 #include "Building.h"
 #include "Floor.h"
 
+using namespace wreckingmadness;
+
 Building::Building(){}
 
 Building::~Building(){}
@@ -27,7 +29,7 @@ Floor * Building::getLowerFloor(){
 
 Floor * Building::getNFloor(unsigned int N){
 	int i = 0;
-	std::list<Floor *>::iterator it = floor_list.begin();
+	auto it = floor_list.begin();
 	while (it != floor_list.end() && i < N) {
 		++it;
 		i++;

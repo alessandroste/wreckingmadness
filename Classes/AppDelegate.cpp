@@ -1,5 +1,7 @@
 #include "AppDelegate.h"
-#include "MainMenuScene.h"
+
+#include <utility>
+#include "Scenes/MainMenuScene.h"
 #include "SdkBoxHelper.h"
 #include "Utilities.h"
 #include "editor-support/cocostudio/SimpleAudioEngine.h"
@@ -48,7 +50,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // Set the design resolution
     glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
-    Size frameSize = glView->getFrameSize();
+    auto frameSize = glView->getFrameSize();
     // if the frame's height is larger than the height of medium size.
     if (frameSize.height > mediumResolutionSize.height) {
         director->setContentScaleFactor(MIN(largeResolutionSize.height / designResolutionSize.height, largeResolutionSize.width / designResolutionSize.width));
@@ -68,9 +70,9 @@ bool AppDelegate::applicationDidFinishLaunching() {
 #ifdef COCOS2D_DEBUG
     director->setDisplayStats(true);
 #endif
-    
-    SdkBoxHelper::Init();
 
+    SdkBoxHelper::Init();
+    SdkBoxHelper::CacheAd(AdType::GAMEOVER);
     director->runWithScene(MainMenuScene::createScene());
     return true;
 }
@@ -90,7 +92,7 @@ void AppDelegate::applicationWillEnterForeground() {
     if (UserDefault::getInstance()->getBoolForKey("music", true))
         CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
- 
+
 void AppDelegate::setSearchPaths() {
     auto director = cocos2d::Director::getInstance();
     CCLOG("Content scale factor %f", director->getContentScaleFactor());

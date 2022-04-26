@@ -1,8 +1,10 @@
 #include "main.h"
 #include "AppDelegate.h"
+#include "windowsPlatform.h"
 #include "cocos2d.h"
 
-USING_NS_CC;
+using namespace cocos2d;
+using namespace wreckingmadness;
 
 int WINAPI _tWinMain(HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
@@ -14,5 +16,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance,
 
     // create the application instance
     AppDelegate app;
+    WindowsPlatform platform;
     return Application::getInstance()->run();
 }

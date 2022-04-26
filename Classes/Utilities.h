@@ -3,12 +3,25 @@
 
 #include <string>
 #include <sstream>
+#include "cocos2d.h"
 
 namespace wreckingmadness {
+    enum ToastDuration {
+        SHORT
+    };
+    
     class Utilities {
+    private:
+        static std::random_device randomDevice;
+        static std::mt19937 randomEngine;
+        static std::uniform_real_distribution<float> floatDistribution;
+        static std::map<ToastDuration, unsigned int> durationMapping;
     public:
         template <typename T>
         static std::string to_string(T value);
+        static void makeToast(std::string const& text, ToastDuration duration);
+        static float getRandom();
+        static int getRandom(int min, int max);
     };
 
     template <typename T>

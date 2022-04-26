@@ -52,10 +52,10 @@ if(APPLE OR WINDOWS)
 endif()
 
 # add cross-platforms source files and header files 
-file(GLOB CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.cpp")
+file(GLOB_RECURSE CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.cpp")
 list(APPEND GAME_SOURCE ${CPP_FILES})
 
-file(GLOB H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.h")
+file(GLOB_RECURSE H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.h")
 list(APPEND GAME_HEADER ${H_FILES})
 
 if(ANDROID)
@@ -63,6 +63,10 @@ if(ANDROID)
     set(APP_NAME wreckingmadness)
     list(APPEND GAME_SOURCE
         proj.android/app/jni/wreckingmadness/main.cpp
+        proj.android/app/jni/wreckingmadness/androidPlatform.cpp
+    )
+    list(APPEND GAME_HEADER
+        proj.android/app/jni/wreckingmadness/androidPlatform.h
     )
 elseif(LINUX)
     list(APPEND GAME_SOURCE
@@ -72,10 +76,12 @@ elseif(WINDOWS)
     list(APPEND GAME_HEADER
         proj.win32/main.h
         proj.win32/resource.h
+        proj.win32/windowsPlatform.h
     )
     list(APPEND GAME_SOURCE
         proj.win32/main.cpp
         proj.win32/game.rc
+        proj.win32/windowsPlatform.cpp
         ${common_res_files}
     )
 elseif(APPLE)

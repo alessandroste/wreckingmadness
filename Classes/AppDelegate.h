@@ -3,40 +3,40 @@
 
 #include <memory>
 #include "cocos2d.h"
-#include "FirebaseHelper.h"
+#include "Common.h"
+#include "PlatformAbstraction.h"
 
-/**
-@brief    The cocos2d Application.
-The reason for implement as private inheritance is to hide some interface call by Director.
-*/
-class  AppDelegate : private cocos2d::Application
-{
-private:
-    std::unique_ptr<wreckingmadness::FirebaseHelper> firebaseHelper;
-    static void setSearchPaths();
-public:
-    AppDelegate();
-    virtual ~AppDelegate();
-
-    virtual void initGLContextAttrs();
-
+namespace wreckingmadness {
     /**
-    @brief    Implement Director and Scene init code here.
-    @return true    Initialize success, app continue.
-    @return false   Initialize failed, app terminate.
+    @brief    The cocos2d Application.
+    The reason for implement as private inheritance is to hide some interface call by Director.
     */
-    virtual bool applicationDidFinishLaunching();
+    class AppDelegate : private cocos2d::Application {
+    private:
+        static void setSearchPaths();
+    public:
+        AppDelegate();
+        virtual ~AppDelegate();
+        virtual void initGLContextAttrs();
 
-    /**
-    @brief  The function be called when the application enter background
-    @param  the pointer of the application
-    */
-    virtual void applicationDidEnterBackground();
+        /**
+        @brief    Implement Director and Scene init code here.
+        @return true    Initialize success, app continue.
+        @return false   Initialize failed, app terminate.
+        */
+        virtual bool applicationDidFinishLaunching();
 
-    /**
-    @brief  The function be called when the application enter foreground
-    @param  the pointer of the application
-    */
-    virtual void applicationWillEnterForeground();
-};
+        /**
+        @brief  The function be called when the application enter background
+        @param  the pointer of the application
+        */
+        virtual void applicationDidEnterBackground();
+
+        /**
+        @brief  The function be called when the application enter foreground
+        @param  the pointer of the application
+        */
+        virtual void applicationWillEnterForeground();
+    };
+}
 #endif // _APP_DELEGATE_H_

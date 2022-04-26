@@ -1,7 +1,3 @@
-//
-// Created by alessandro on 24/04/2022.
-//
-
 #ifndef _ADLISTENER_H
 #define _ADLISTENER_H
 #ifdef SDKBOX_ENABLED
