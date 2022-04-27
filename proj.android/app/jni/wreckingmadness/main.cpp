@@ -36,10 +36,11 @@ using namespace wreckingmadness;
 
 namespace {
     std::unique_ptr<AppDelegate> appDelegate;
+    std::unique_ptr<AndroidPlatform> platformAbstraction;
 }
 
 void cocos_android_app_init(JNIEnv* env) {
     LOGD("cocos_android_app_init");
-    AndroidPlatform platform;
+    platformAbstraction.reset(new AndroidPlatform());
     appDelegate.reset(new AppDelegate());
 }

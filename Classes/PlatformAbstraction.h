@@ -6,13 +6,16 @@
 namespace wreckingmadness {
     class PlatformAbstraction {
     protected:
-        static PlatformAbstraction* instance;
+        static PlatformAbstraction* platformInstance;
+        virtual const char* getName() const { return "PlatformAbstraction"; };
     public:
         PlatformAbstraction();
-        virtual void shareImageFromFile(const std::string& fileName) {
-            CCLOG("[PlatformAbstraction] Shared image from file %s", fileName.c_str());
-        };
-        static PlatformAbstraction* getInstance();
+        virtual ~PlatformAbstraction();
+        PlatformAbstraction(PlatformAbstraction const&) = delete;
+        void operator=(PlatformAbstraction const&) = delete;
+        virtual void shareImageFromFile(const std::string& fileName);
+        static PlatformAbstraction* getInstance() { return platformInstance; };
+        const char* getNamePublic() const { return getName(); }; 
     };
 }
 

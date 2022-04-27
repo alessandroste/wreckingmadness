@@ -60,7 +60,7 @@ android {
         }
     }
     
-    ndkVersion '24.0.8215888'
+    ndkVersion '21.1.6352462'
 }
 
 android.applicationVariants.all { variant ->

@@ -1,15 +1,17 @@
-#ifndef WRECKINGMADNESS_ANDROIDPLATFORM_H
-#define WRECKINGMADNESS_ANDROIDPLATFORM_H
+#ifndef _ANDROIDPLATFORM_H_
+#define _ANDROIDPLATFORM_H_
 
 #include "PlatformAbstraction.h"
 
 namespace wreckingmadness {
-    class AndroidPlatform : public PlatformAbstraction {
+    class AndroidPlatform : PlatformAbstraction {
+    protected:
+        virtual const char* getName() const override { return "AndroidPlatform"; };
     public:
-        virtual void shareImageFromFile(const std::string &fileName) {
-            CCLOG("[AndroidPlatform] Shared image from file %s", fileName.c_str());
-        };
+        AndroidPlatform() {};
+        virtual ~AndroidPlatform() {};
+        virtual void shareImageFromFile(const std::string &fileName) override;
     };
 }
 
-#endif //WRECKINGMADNESS_ANDROIDPLATFORM_H
+#endif //_ANDROIDPLATFORM_H_

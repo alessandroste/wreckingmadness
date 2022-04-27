@@ -7,7 +7,9 @@
 
 namespace wreckingmadness {
     enum ToastDuration {
-        SHORT
+        SHORT,
+        MEDIUM,
+        LONG
     };
     
     class Utilities {
@@ -15,7 +17,7 @@ namespace wreckingmadness {
         static std::random_device randomDevice;
         static std::mt19937 randomEngine;
         static std::uniform_real_distribution<float> floatDistribution;
-        static std::map<ToastDuration, unsigned int> durationMapping;
+        static std::map<ToastDuration, float> durationMapping;
     public:
         template <typename T>
         static std::string to_string(T value);

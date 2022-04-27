@@ -24,9 +24,15 @@ THE SOFTWARE.
 ****************************************************************************/
 package com.ales.wreckingmadness;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowManager;
+
+import androidx.core.content.FileProvider;
+
+import java.io.File;
 
 public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
     @Override
@@ -48,5 +54,15 @@ public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             getWindow().setAttributes(lp);
         }
+    }
+    
+    public void shareIntent(String fileName) {
+        final String fileProviderAuthority = "com.ales.wreckingmadness.FileProvider";
+        final Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("image/jpg");
+        final File photoFile = new File(getFilesDir(), fileName);
+        final Uri uri = FileProvider.getUriForFile(this, fileProviderAuthority, photoFile);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        startActivity(Intent.createChooser(shareIntent, "Share image using"));
     }
 }

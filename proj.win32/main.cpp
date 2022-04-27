@@ -6,7 +6,8 @@
 using namespace cocos2d;
 using namespace wreckingmadness;
 
-int WINAPI _tWinMain(HINSTANCE hInstance,
+int WINAPI _tWinMain(
+    HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
     LPTSTR    lpCmdLine,
     int       nCmdShow) {

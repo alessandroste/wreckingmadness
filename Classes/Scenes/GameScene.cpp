@@ -226,11 +226,13 @@ void GameScene::screenCapturedCallback(bool succeed, const std::string& outputFi
         }
 #else
         Utilities::makeToast("Screenshot done", ToastDuration::SHORT);
-        PlatformAbstraction::getInstance()->shareImageFromFile("hello");
+        Director::getInstance()->pause();
+        PlatformAbstraction::getInstance()->shareImageFromFile(SCREEN_FILE);
+        Director::getInstance()->resume();
 #endif
     }
     else {
-        Utilities::makeToast("error encountered while doing screenshot", ToastDuration::SHORT);
+        Utilities::makeToast("Error encountered while doing screenshot", ToastDuration::SHORT);
     }
 }
 
@@ -299,21 +301,21 @@ void GameScene::shareScore() {
 
 void GameScene::spanCloud(bool random) {
     auto cloud = Common::spanCloud();
-    auto cloud_height = visibleOrigin.y + Utilities::getRandom() * visibleSize.height;
-    auto cloud_vel = CLOUD_SPEED_OFFSET + Utilities::getRandom() * CLOUD_SPEED;
-    auto cloud_width = cloud->getBoundingBox().size.width;
-    auto cloud_space = visibleSize.width + cloud_width * 2;
-    auto cloud_x = visibleOrigin.x + visibleSize.width + cloud_width;
+    auto cloudHeight = visibleOrigin.y + Utilities::getRandom() * visibleSize.height;
+    auto cloudSpeed = CLOUD_SPEED_OFFSET + Utilities::getRandom() * CLOUD_SPEED;
+    auto cloudWidth = cloud->getBoundingBox().size.width;
+    auto cloudSpace = visibleSize.width + cloudWidth * 2;
+    auto cloudX = visibleOrigin.x + visibleSize.width + cloudWidth;
     if (random)
-        cloud_x = visibleOrigin.x + Utilities::getRandom() * visibleSize.width;
-    cloud->setPosition(Vec2(cloud_x, cloud_height));
+        cloudX = visibleOrigin.x + Utilities::getRandom() * visibleSize.width;
+    cloud->setPosition(Vec2(cloudX, cloudHeight));
     addChild(cloud, 1);
     auto cloudSpawnFunction = CallFunc::create([this](){ spanCloud(false); });
     cloud->runAction(Sequence::create(
-            MoveBy::create(cloud_space / cloud_vel, Vec2(-cloud_space, 0)),
-            cloudSpawnFunction,
-            RemoveSelf::create(),
-            nullptr));
+        MoveBy::create(cloudSpace / cloudSpeed, Vec2(-cloudSpace, 0)),
+        cloudSpawnFunction,
+        RemoveSelf::create(),
+        nullptr));
 }
 
 void GameScene::throwBall(int direction = 1, bool stopped = false, float height = 0) {
@@ -327,8 +329,8 @@ void GameScene::throwBall(int direction = 1, bool stopped = false, float height 
             visibleOrigin.x - ballRadius * scale;
         auto yPos = height + ballLength;
         ballNode->setPosition(Vec2(xPos, yPos));
-        float space1 = visibleSize.width / 2 - floor_width / 2 + ballRadius * scale;
-        float space = visibleSize.width + floor_width;
+        auto space1 = visibleSize.width / 2 - floor_width / 2 + ballRadius * scale;
+        auto space = visibleSize.width + floor_width;
         if (!stopped) {
             ballNode->runAction(Sequence::create(
                 MoveBy::create(space1 / BREAK_SPEED, Vec2(direction * space1, 0)),

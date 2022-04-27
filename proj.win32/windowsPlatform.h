@@ -5,8 +5,12 @@
 
 namespace wreckingmadness {
     class WindowsPlatform : PlatformAbstraction {
+    protected:
+        virtual const char* getName() const override { return "WindowsPlatform"; };
     public:
-        virtual void shareImageFromFile(const std::string& fileName) {
+        WindowsPlatform() {};
+        virtual ~WindowsPlatform() {};
+        virtual void shareImageFromFile(const std::string& fileName) override {
             CCLOG("[WindowsPlatform] Shared image from file %s", fileName.c_str());
         };
     };
