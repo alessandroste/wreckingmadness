@@ -14,3 +14,6 @@ proj.android*/**/.idea
 # Linux
 proj.linux/*
 !proj.linux/*.cpp
+
+# Windows
+proj.win32/build

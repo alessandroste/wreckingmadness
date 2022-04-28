@@ -104,6 +104,81 @@
         "reveal": "never"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Clean (functions)",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/server/functions"
+      },
+      "args": [
+        "clean",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build (functions)",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/server/functions"
+      },
+      "args": [
+        "build",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "dependsOn": "clean (functions)",
+      "group": {
+        "kind": "build"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Clean release (functions)",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/server/functions"
+      },
+      "args": [
+        "clean",
+        "--configuration",
+        "Release",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Publish (functions)",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/server/functions"
+      },
+      "args": [
+        "publish",
+        "--configuration",
+        "Release",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "dependsOn": "clean release (functions)",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "type": "func",
+      "dependsOn": "Build (functions)",
+      "options": {
+        "cwd": "${workspaceFolder}/server/functions/bin/Debug/net6.0"
+      },
+      "command": "host start",
+      "isBackground": true,
+      "problemMatcher": "$func-dotnet-watch"
     }
   ]
 }
