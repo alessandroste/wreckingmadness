@@ -13,16 +13,16 @@ namespace WreckingMadness.Functions
     using Microsoft.Extensions.Logging;
     using WreckingMadness.Functions.Model;
 
-    public class UpdateTopScoreForPlayerFunction : BaseFunction
+    public class UpdateScoreFunction : BaseFunction
     {
-        public UpdateTopScoreForPlayerFunction(
+        public UpdateScoreFunction(
             Configuration configuration,
             CosmosClient cosmosClient)
             : base(configuration, cosmosClient)
         {
         }
 
-        [FunctionName("UpdateTopScoreForPlayer")]
+        [FunctionName("UpdateScore")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request,
             ILogger logger,
@@ -45,21 +45,35 @@ namespace WreckingMadness.Functions
 
             try
             {
-                var percentile = await GetPercentileAsync(container, data, this.configuration.CollectionName, cancellationToken);
-                data.Percentile = percentile;
-
+                var scoreToCompare = data.TopScore;
+                logger.LogInformation("Received score information, trying creating");
                 var created = await TryCreateItemAsync(container, data, cancellationToken);
                 if (!created)
                 {
-                    await container.UpsertItemAsync(data, PartitionKey.None, cancellationToken: cancellationToken);
+                    logger.LogInformation("Creation failed, checking if update is needed");
+                    var currentItem = await container.ReadItemAsync<Player>(data.Identifier.ToString(), PartitionKey.None, cancellationToken: cancellationToken);
+                    if (!currentItem.Resource.TopScore.HasValue || currentItem.Resource.TopScore.Value < data.TopScore)
+                    {
+                        logger.LogInformation("Score needs to be updated");
+                        await container.UpsertItemAsync(data, PartitionKey.None, cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        scoreToCompare = currentItem.Resource.TopScore;
+                    }
                 }
 
-                return new OkResult();
+                logger.LogInformation("Requesting percentile for score {0}", scoreToCompare.Value);
+                var percentile = await GetPercentileAsync(container, scoreToCompare.Value, this.configuration.CollectionName, cancellationToken);
+                data.Percentile = percentile;
+                logger.LogInformation("Retrieved percentile {0}", percentile);
+
+                return new OkObjectResult(data);
             }
             catch (CosmosException cosmosException)
             {
-                logger.LogError("Creating item failed with error {0}", cosmosException.ToString());
-                return new BadRequestObjectResult($"Failed to process request.");
+                logger.LogError(cosmosException, "Cosmos request failed");
+                return new BadRequestObjectResult("Failed to process request.");
             }
         }
 
@@ -76,12 +90,12 @@ namespace WreckingMadness.Functions
             }
         }
 
-        private static async Task<float> GetPercentileAsync(Container container, Player data, string collectionName, CancellationToken cancellationToken)
+        private static async Task<float> GetPercentileAsync(Container container, uint score, string collectionName, CancellationToken cancellationToken)
         {
             var queryDefinition = new QueryDefinition(@$"
                 SELECT (SELECT COUNT(1) * 100
                 FROM {collectionName} s
-                WHERE s.topScore < {data.TopScore})/
+                WHERE s.topScore < {score})/
                 (SELECT COUNT()
                 FROM {collectionName} s) AS percentage
             ");

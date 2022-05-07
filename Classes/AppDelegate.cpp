@@ -1,10 +1,10 @@
 #include "AppDelegate.h"
 
 #include <utility>
-#include "Scenes/MainMenuScene.h"
-#include "SdkBoxHelper.h"
-#include "Utilities.h"
 #include "editor-support/cocostudio/SimpleAudioEngine.h"
+#include "Scenes/MainMenuScene.h"
+#include "Integrations/SdkBoxHelper.h"
+#include "Utilities.h"
 
 using namespace cocos2d;
 using namespace wreckingmadness;

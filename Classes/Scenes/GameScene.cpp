@@ -1,11 +1,15 @@
 #include "AppDelegate.h"
+
+#include <iomanip>
+#include <sstream>
+
+#include "ui/UIEditBox/UIEditBox.h"
+#include "ui/UIImageView.h"
+#include "../Integrations/SdkBoxHelper.h"
 #include "GameScene.h"
 #include "Common.h"
 #include "Utilities.h"
-#include "SdkBoxHelper.h"
-#include "editor-support/cocostudio/SimpleAudioEngine.h"
-#include "ui\UIEditBox\UIEditBox.h"
-#include "ui\UIImageView.h"
+#include "SoundService.h"
 #ifdef SDKBOX_ENABLED
 #include "PluginAdMob/PluginAdMob.h"
 #ifdef SDKBOX_FACEBOOK
@@ -25,6 +29,7 @@ using namespace wreckingmadness;
 #define CLOUD_NUM 20
 #define BREAK_SPEED 3000
 #define SCREEN_FILE "screenshot.png"
+#define NODE_SPINNER_NAME "spinner"
 
 Scene* GameScene::createScene() {
     auto scene = Scene::create();
@@ -48,8 +53,8 @@ bool GameScene::init() {
     currentScore = 0;
     labelScore = Label::createWithTTF("0", TEXT_FONT, 40);
     labelScore->setPosition(visibleOrigin + Vec2(
-            visibleSize.width / 2,
-            visibleSize.height - labelScore->getContentSize().height));
+        visibleSize.width / 2,
+        visibleSize.height - labelScore->getContentSize().height));
     labelScore->setAnchorPoint(Vec2(0.5f, 0.5f));
     labelScore->enableOutline(Color4B(0, 0, 0, 255), 1);
     addChild(labelScore, 5);
@@ -83,10 +88,20 @@ bool GameScene::init() {
     // touch
     auto listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
-    listener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
-    listener->onTouchMoved = CC_CALLBACK_2(GameScene::onTouchMoved, this);
-    listener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded, this);
-    listener->onTouchCancelled = CC_CALLBACK_2(GameScene::onTouchCancelled, this);
+    listener->onTouchBegan = [this](Touch* touch, Event* event) {
+        initialTouchPos[0] = touch->getLocation().x;
+        initialTouchPos[1] = touch->getLocation().y;
+        currentTouchPos[0] = touch->getLocation().x;
+        currentTouchPos[1] = touch->getLocation().y;
+        isTouchDown = true;
+        return true;
+    };
+    listener->onTouchMoved = [this](Touch* touch, Event* event) {
+        currentTouchPos[0] = touch->getLocation().x;
+        currentTouchPos[1] = touch->getLocation().y;
+    };
+    listener->onTouchEnded = [this](Touch* touch, Event* event) { isTouchDown = false; };
+    listener->onTouchCancelled = listener->onTouchEnded;
     Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
     isTouchDown = false;
     initialTouchPos[0] = 0;
@@ -94,8 +109,8 @@ bool GameScene::init() {
 
     // player id
     if (Common::getPlayerID()) {
-        auto playerId = UserDefault::getInstance()->getIntegerForKey(CONFIG_KEY_PLAYER_ID);
-        CCLOG("Player ID exists, it is %d", playerId);
+        auto playerId = UserDefault::getInstance()->getStringForKey(CONFIG_KEY_PLAYER_ID);
+        CCLOG("[GameScene] Player ID exists, it is %s", playerId.c_str());
     }
 
     // difficulty
@@ -116,28 +131,6 @@ void GameScene::onExitTransitionDidStart() {
     unscheduleUpdate();
 }
 
-bool GameScene::onTouchBegan(Touch* touch, Event* event) {
-    initialTouchPos[0] = touch->getLocation().x;
-    initialTouchPos[1] = touch->getLocation().y;
-    currentTouchPos[0] = touch->getLocation().x;
-    currentTouchPos[1] = touch->getLocation().y;
-    isTouchDown = true;
-    return true;
-}
-
-void GameScene::onTouchMoved(Touch* touch, Event* event) {
-    currentTouchPos[0] = touch->getLocation().x;
-    currentTouchPos[1] = touch->getLocation().y;
-}
-
-void GameScene::onTouchEnded(Touch* touch, Event* event) {
-    isTouchDown = false;
-}
-
-void GameScene::onTouchCancelled(Touch* touch, Event* event) {
-    onTouchEnded(touch, event);
-}
-
 void GameScene::endGame() {
     labelScore->removeFromParent();
     Director::getInstance()->getEventDispatcher()->removeAllEventListeners();
@@ -145,16 +138,16 @@ void GameScene::endGame() {
         skyscraper->removeFloor();
     }
 
-    // update top game currentScore
-    if (currentScore > Common::getTopLocalScore())
-        Common::setTopLocalScore(currentScore);
-
-    // menu
-    endGameMenu = buildEndGameMenu(currentScore, Common::getTopLocalScore());
-    addChild(endGameMenu, 6);
-    
     SdkBoxHelper::ShowAd(AdType::GAMEOVER);
-    percReceived(100.0);
+
+    auto localTopScore = Common::getTopLocalScore();
+    auto currentTopScore = currentScore > localTopScore ? currentScore : localTopScore;
+    endGameMenu = buildEndGameMenu(currentScore, currentTopScore);
+    addChild(endGameMenu, 6);
+
+    Common::processScore(currentScore, [this](float percentage) {
+        percentileReceivedCallback(percentage);
+        });
 }
 
 void GameScene::restartGame() {
@@ -178,7 +171,7 @@ void GameScene::checkTouch(int num) {
         else if (initialTouchPos[0] - currentTouchPos[0] < -SWIPE_FACTOR) {
             if (skyscraper->getUpperFloor()->getFloorType() == FloorType::METAL_LEFT ||
                 skyscraper->getUpperFloor()->getFloorType() == FloorType::NORMAL ||
-                skyscraper->getUpperFloor()->getFloorType() == FloorType::ROOF ) {
+                skyscraper->getUpperFloor()->getFloorType() == FloorType::ROOF) {
                 updateTop(Direction::RIGHT);
             }
             else
@@ -310,7 +303,7 @@ void GameScene::spanCloud(bool random) {
         cloudX = visibleOrigin.x + Utilities::getRandom() * visibleSize.width;
     cloud->setPosition(Vec2(cloudX, cloudHeight));
     addChild(cloud, 1);
-    auto cloudSpawnFunction = CallFunc::create([this](){ spanCloud(false); });
+    auto cloudSpawnFunction = CallFunc::create([this]() { spanCloud(false); });
     cloud->runAction(Sequence::create(
         MoveBy::create(cloudSpace / cloudSpeed, Vec2(-cloudSpace, 0)),
         cloudSpawnFunction,
@@ -329,8 +322,8 @@ void GameScene::throwBall(int direction = 1, bool stopped = false, float height 
             visibleOrigin.x - ballRadius * scale;
         auto yPos = height + ballLength;
         ballNode->setPosition(Vec2(xPos, yPos));
-        auto space1 = visibleSize.width / 2 - floor_width / 2 + ballRadius * scale;
-        auto space = visibleSize.width + floor_width;
+        auto space1 = visibleSize.width / 2 - floorWidth / 2 + ballRadius * scale;
+        auto space = visibleSize.width + floorWidth;
         if (!stopped) {
             ballNode->runAction(Sequence::create(
                 MoveBy::create(space1 / BREAK_SPEED, Vec2(direction * space1, 0)),
@@ -354,21 +347,21 @@ void GameScene::throwBall(int direction = 1, bool stopped = false, float height 
 
 void GameScene::playCrashSound(bool metal = false) {
     if (!metal)
-        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(SOUND_HIT);
+        SoundService::playEffect(Effect::HIT);
     else
-        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(SOUND_METAL_HIT);
+        SoundService::playEffect(Effect::METAL_HIT);
 }
 
-void GameScene::percReceived(float perc) {
+void GameScene::percentileReceivedCallback(float perc) {
     CCLOG("[GameScene] Percentage received by GAME %f", perc);
-    if (endGameMenu != nullptr && endGameMenu->getChildByName("spinner") != nullptr) {
-        char str[100];
-        snprintf(str, sizeof(str), "Better than\n%.2f %%\nof players", perc);
-        endGameMenu->getChildByName("spinner")->removeFromParent();
-        auto finalScoreLabel = Label::createWithTTF(str, TEXT_FONT, TEXT_SIZE_DEFAULT);
+    if (endGameMenu != nullptr && endGameMenu->getChildByName(NODE_SPINNER_NAME) != nullptr) {
+        auto stream = std::ostringstream();
+        stream << "Better than" << std::endl << std::fixed << std::setprecision(2) << perc << std::endl << "%% of players";
+        endGameMenu->getChildByName(NODE_SPINNER_NAME)->removeFromParent();
+        auto finalScoreLabel = Label::createWithTTF(stream.str(), TEXT_FONT, TEXT_SIZE_DEFAULT);
         finalScoreLabel->setHorizontalAlignment(TextHAlignment::CENTER);
-        finalScoreLabel->setTextColor(Color4B(255, 221, 88, 255));
-        finalScoreLabel->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 1.4));
+        finalScoreLabel->setTextColor(Common::ScorePercentageTextColor);
+        finalScoreLabel->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 1.4f));
         endGameMenu->addChild(finalScoreLabel, 2);
     }
 }
@@ -394,7 +387,7 @@ void GameScene::shareScreen(std::string file, std::string title) {
 void GameScene::generateFloor(bool roof, float correction) {
     auto y = roof ? visibleOrigin.y : skyscraper->getLowerFloor()->getSprite()->getPositionY();
     auto floor = new Floor(FloorStatus::BROKEN, roof ? FloorType::ROOF : Floor::getRandomFloorType());
-    floor_width = floor->getSprite()->getBoundingBox().size.width;
+    floorWidth = floor->getSprite()->getBoundingBox().size.width;
     auto sprite_height = floor->getSprite()->getContentSize().height;
     floor->getSprite()->setPosition((Vec2(visibleOrigin.x + visibleSize.width / 2, y - sprite_height + correction)));
     addChild(floor->getSprite(), 3);
@@ -404,7 +397,7 @@ void GameScene::generateFloor(bool roof, float correction) {
 void GameScene::removeTop(int dir) {
     if (!end) {
         // this space has to be the same also for floor
-        float space = visibleSize.width + floor_width;
+        float space = visibleSize.width + floorWidth;
         skyscraper->getUpperFloor()->getSprite()->runAction(Sequence::create(
             MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
             RemoveSelf::create(),
@@ -430,31 +423,31 @@ bool GameScene::updateTop(Direction direction) {
     if (direction == Direction::LEFT)
         sign = -1;
     switch (skyscraper->getUpperFloor()->getFloorStatus()) {
-        case BROKEN:
-            {
-                auto y = skyscraper->getUpperFloor()->getSprite()->getPositionY() +
-                    skyscraper->getUpperFloor()->getSprite()->getContentSize().height / 2;
-                throwBall(sign, false, y);
-                return true;
-            }
-    //    case HALF:
-    //        {
-    //            skyscraper->getUpperFloor()->getFloorStatus() = BROKEN;
-    //            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
-    //            return false;
-    //        }
-    //    case GOOD:
-    //        {
-    //            skyscraper->getUpperFloor()->floorStatus = HALF;
-    //            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
-    //            return false;
-    //        }
-        default:
-            return false;
+    case BROKEN:
+        {
+            auto y = skyscraper->getUpperFloor()->getSprite()->getPositionY() +
+                skyscraper->getUpperFloor()->getSprite()->getContentSize().height / 2;
+            throwBall(sign, false, y);
+            return true;
+        }
+        //    case HALF:
+        //        {
+        //            skyscraper->getUpperFloor()->getFloorStatus() = BROKEN;
+        //            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
+        //            return false;
+        //        }
+        //    case GOOD:
+        //        {
+        //            skyscraper->getUpperFloor()->floorStatus = HALF;
+        //            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
+        //            return false;
+        //        }
+    default:
+        return false;
     }
 }
 
-Node* GameScene::buildEndGameMenu(unsigned int score, int top_score) {
+Node* GameScene::buildEndGameMenu(unsigned int score, int topScore) {
     auto off = 15.0f;
     auto metalColor = Color4F(Common::MetalColor);
     auto metalColorLight = Color4F(Common::MetalColorLight);
@@ -489,12 +482,12 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int top_score) {
     Vec2 stripe2[4] = {
             Vec2(-stripewidth * 2 - stripedist * 2,0),
             Vec2(0, stripewidth * 2 + stripedist * 2),
-            Vec2(0, stripewidth * 2.8 + stripedist * 2),
-            Vec2(-stripewidth * 2.8 - stripedist * 2, 0)
+            Vec2(0, stripewidth * 2.8f + stripedist * 2),
+            Vec2(-stripewidth * 2.8f - stripedist * 2, 0)
     };
     stripes->drawPolygon(stripe2, 4, metalColorLight, 0, Color4F::BLACK);
     stripes->setPosition(origin +
-        Vec2(screenSize.width * (1 / FILL + 1.0 / 2), off + screenSize.height * (-1 / FILL + 1.0 / 2)));
+        Vec2(screenSize.width * (1 / FILL + 1.0f / 2), off + screenSize.height * (-1 / FILL + 1.0f / 2)));
     menu->addChild(stripes);
 
     // drawing bolts
@@ -507,24 +500,24 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int top_score) {
     bolt2->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltColor);
     bolt3->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltColor);
     bolt4->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltColor);
-    bolt1->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0 / 2) - boltradius * FILL, screenSize.height * (1 / FILL + 1.0 / 2) - boltradius * FILL));
-    bolt2->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0 / 2) + boltradius * FILL, screenSize.height * (1 / FILL + 1.0 / 2) - boltradius * FILL));
-    bolt3->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0 / 2) - boltradius * FILL, off + screenSize.height * (-1 / FILL + 1.0 / 2) + boltradius * FILL));
-    bolt4->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0 / 2) + boltradius * FILL, off + screenSize.height * (-1 / FILL + 1.0 / 2) + boltradius * FILL));
+    bolt1->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0f / 2) - boltradius * FILL, screenSize.height * (1 / FILL + 1.0f / 2) - boltradius * FILL));
+    bolt2->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0f / 2) + boltradius * FILL, screenSize.height * (1 / FILL + 1.0f / 2) - boltradius * FILL));
+    bolt3->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0f / 2) - boltradius * FILL, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltradius * FILL));
+    bolt4->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0f / 2) + boltradius * FILL, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltradius * FILL));
     menu->addChild(bolt1);
     menu->addChild(bolt2);
     menu->addChild(bolt3);
     menu->addChild(bolt4);
     auto engrave = Label::createWithTTF("wrecking madness", TEXT_FONT, 12);
-    engrave->setPosition(origin + Vec2(screenSize.width / 2, off + screenSize.height * (-1 / FILL + 1.0 / 2) + boltradius * FILL));
+    engrave->setPosition(origin + Vec2(screenSize.width / 2, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltradius * FILL));
     engrave->setTextColor(Common::BoltColorDark);
     menu->addChild(engrave);
 
     auto spinner = Sprite::create("spinner.png");
-    spinner->setName("spinner");
+    spinner->setName(NODE_SPINNER_NAME);
     spinner->setScale(0.6f);
-    spinner->setPosition(origin + Vec2(screenSize.width / 2, screenSize.height / 1.4));
-    spinner->runAction(RepeatForever::create(RotateBy::create(0.1, 2 * M_PI)));
+    spinner->setPosition(origin + Vec2(screenSize.width / 2, screenSize.height / 1.4f));
+    spinner->runAction(RepeatForever::create(RotateBy::create(0.1f, 2.0f * M_PI)));
     menu->addChild(spinner);
 
     // all the labels
@@ -535,22 +528,22 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int top_score) {
     auto label_score = Label::createWithTTF("currentScore", TEXT_FONT, TEXT_SIZE_CREDITS);
     label_score->setAnchorPoint(Vec2(0, 0.5));
     label_score->setPosition(origin + Vec2(screenSize.width / 2 - screenSize.width / FILL + border,
-                                           screenSize.height / 2 + TEXT_SIZE_CREDITS));
+        screenSize.height / 2 + TEXT_SIZE_CREDITS));
     menu->addChild(label_score, 1);
     auto label_top = Label::createWithTTF("your\ntop currentScore", TEXT_FONT, TEXT_SIZE_CREDITS);
     label_top->setAnchorPoint(Vec2(0, 0.5));
     label_top->setPosition(origin + Vec2(screenSize.width / 2 - screenSize.width / FILL + border,
-                                         screenSize.height / 2 - TEXT_SIZE_CREDITS * 2));
+        screenSize.height / 2 - TEXT_SIZE_CREDITS * 2));
     menu->addChild(label_top, 1);
-    auto score_top = Label::createWithTTF(Utilities::to_string(top_score), TEXT_FONT, TEXT_SIZE_DEFAULT);
+    auto score_top = Label::createWithTTF(Utilities::to_string(topScore), TEXT_FONT, TEXT_SIZE_DEFAULT);
     score_top->setAnchorPoint(Vec2(1, 0.5));
     score_top->setPosition(origin + Vec2(screenSize.width / 2 + screenSize.width / FILL - border,
-                                         screenSize.height / 2 - TEXT_SIZE_DEFAULT * 4));
+        screenSize.height / 2 - TEXT_SIZE_DEFAULT * 4));
     menu->addChild(score_top, 1);
     auto score_ = Label::createWithTTF(Utilities::to_string(score), TEXT_FONT, TEXT_SIZE_DEFAULT);
     score_->setAnchorPoint(Vec2(1, 0.5));
     score_->setPosition(origin + Vec2(screenSize.width / 2 + screenSize.width / FILL - border,
-                                      screenSize.height / 2));
+        screenSize.height / 2));
     menu->addChild(score_, 1);
 
     // buttons
@@ -560,8 +553,8 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int top_score) {
     btnExit->setCallback(std::bind(&Common::enterMainMenuScene));
     btnShare->setCallback(CC_CALLBACK_0(GameScene::shareScore, this));
     btnRestart->setCallback(std::bind(&GameScene::restartGame));
-    
-    auto buttons = Vector<MenuItem*> { btnRestart, btnShare };
+
+    auto buttons = Vector<MenuItem*>{ btnRestart, btnShare };
 #if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
     auto btnFacebook = MenuItemImage::create("mb_fb_n.png", "mb_fb_p.png");
     btnFacebook->setName(BUTTON_FACEBOOK);
@@ -572,8 +565,8 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int top_score) {
     bt_menu->alignItemsHorizontally();
     bt_menu->setAnchorPoint(Vec2(0, 0.5));
     bt_menu->setPosition(origin + Vec2(
-            screenSize.width / 2,
-            screenSize.height * (1.0f / 2 - 1 / FILL) + border * 4));
+        screenSize.width / 2,
+        screenSize.height * (1.0f / 2 - 1 / FILL) + border * 4));
     menu->addChild(bt_menu);
 
     return menu;

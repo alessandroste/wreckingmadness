@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Android Debug",
+      "name": "Game debug (Android)",
       "type": "cppdbg",
       "request": "launch",
       "program": "/tmp/gdbclient-binary-8658",
@@ -21,7 +21,7 @@
       }
     },
     {
-      "name": "Launch",
+      "name": "Game debug (Windows)",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "wreckingmadness.exe",
@@ -37,13 +37,13 @@
       }
     },
     {
-      "name": "Attach",
+      "name": "Process attach (Windows)",
       "type": "cppvsdbg",
       "request": "attach",
       "processId": "${command:pickProcess}"
     },
     {
-      "name": "Attach to .NET Functions",
+      "name": "Server debug",
       "type": "coreclr",
       "request": "attach",
       "processId": "${command:azureFunctions.pickProcess}"

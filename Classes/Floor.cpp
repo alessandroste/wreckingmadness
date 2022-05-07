@@ -40,6 +40,6 @@ std::string Floor::getSpriteNameFromType(FloorType floorType) {
 
 FloorType Floor::getRandomFloorType() {
     auto availableTypesSize = availableFloorTypes.size();
-    auto randomIndex = std::floor(Utilities::getRandom(0, availableTypesSize - 1));
+    auto randomIndex = Utilities::getRandom(0, availableTypesSize - 1);
     return availableFloorTypes.at(randomIndex);
 }

@@ -1,9 +1,10 @@
 #include "SettingsScene.h"
+
+#include "../Integrations/SdkBoxHelper.h"
 #include "Common.h"
 #include "MainMenuScene.h"
-#include "editor-support/cocostudio/SimpleAudioEngine.h"
-#include "SdkBoxHelper.h"
 #include "Utilities.h"
+#include "SoundService.h"
 #ifdef SDKBOX_ENABLED
 #include "PluginAdMob/PluginAdMob.h"
 #ifdef SDKBOX_FACEBOOK
@@ -41,9 +42,9 @@ bool SettingsScene::init() {
     }
 #endif
     auto credits = "wrecking madness is a simple game written" \
-                   "in C++ thanks to the awesome cocos2dx library.\n" \
-                   "Many free resources have been used, credits to " \
-                   "kenney.nl for sprites (some retouched).";
+        "in C++ thanks to the awesome cocos2dx library.\n" \
+        "Many free resources have been used, credits to " \
+        "kenney.nl for sprites (some retouched).";
 
     auto lbl_credits = Label::createWithTTF(credits, TEXT_FONT, TEXT_SIZE_CREDITS,
         Size(visibleSize.width / 1.1f, 0));
@@ -53,15 +54,16 @@ bool SettingsScene::init() {
     addChild(lbl_credits);
 
     auto btnReturn = MenuItemImage::create("mb_ret_n.png", "mb_ret_p.png",
-                                           std::bind(&Common::enterMainMenuScene));
+        std::bind(&Common::enterMainMenuScene));
     btnMusic = MenuItemImage::create();
-    if (UserDefault::getInstance()->getBoolForKey(CONFIG_KEY_MUSIC_ENABLED, true)) {
-        btnMusic->initWithNormalImage("mb_musicoff_n.png", "mb_musicoff_p.png", "mb_musicoff_n.png", CC_CALLBACK_0(SettingsScene::toggleMusic, this));
-    }
-    else {
+    if (SoundService::isBackgroundMusicEnabled()) {
         btnMusic->initWithNormalImage("mb_musicon_n.png", "mb_musicon_p.png", "mb_musicon_n.png", CC_CALLBACK_0(SettingsScene::toggleMusic, this));
     }
-    auto menu_return = Menu::createWithArray({btnReturn, btnMusic });
+    else {
+        btnMusic->initWithNormalImage("mb_musicoff_n.png", "mb_musicoff_p.png", "mb_musicoff_n.png", CC_CALLBACK_0(SettingsScene::toggleMusic, this));
+    }
+
+    auto menu_return = Menu::createWithArray({ btnReturn, btnMusic });
     menu_return->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, TEXT_SIZE_START));
     menu_return->alignItemsHorizontally();
     addChild(menu_return);
@@ -78,16 +80,12 @@ void SettingsScene::logoutCallback() {
 }
 
 void SettingsScene::toggleMusic() {
-    if (UserDefault::getInstance()->getBoolForKey(CONFIG_KEY_MUSIC_ENABLED, true)) {
-        UserDefault::getInstance()->setBoolForKey(CONFIG_KEY_MUSIC_ENABLED, false);
-        if (CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
-            CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+    if (!SoundService::isBackgroundMusicEnabled()) {
+        SoundService::setBackgroundMusic(true);
         btnMusic->initWithNormalImage("mb_musicon_n.png", "mb_musicon_p.png", "mb_musicon_n.png", CC_CALLBACK_0(SettingsScene::toggleMusic, this));
     }
     else {
-        UserDefault::getInstance()->setBoolForKey(CONFIG_KEY_MUSIC_ENABLED, true);
-        if (!CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
-            CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("wreckingsound.wav", true);
+        SoundService::setBackgroundMusic(false);
         btnMusic->initWithNormalImage("mb_musicoff_n.png", "mb_musicoff_p.png", "mb_musicoff_n.png", CC_CALLBACK_0(SettingsScene::toggleMusic, this));
     }
 }

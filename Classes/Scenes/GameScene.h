@@ -12,7 +12,7 @@ namespace wreckingmadness {
         LEFT,
         RIGHT
     };
-    
+
     class GameScene : public cocos2d::LayerColor {
     private:
         void update(float dt);
@@ -27,7 +27,7 @@ namespace wreckingmadness {
         float scale;
         bool end;
         bool throwing;
-        float floor_width;
+        float floorWidth;
         std::string outfile;
         unsigned int currentScore;
         cocos2d::Node* buildEndGameMenu(unsigned int score, int top_score);
@@ -38,7 +38,7 @@ namespace wreckingmadness {
         CREATE_FUNC(GameScene);
         static cocos2d::Scene* createScene();
         virtual bool init();
-        
+
         // game events
         void endGame();
         static void restartGame();
@@ -46,10 +46,6 @@ namespace wreckingmadness {
         void onExitTransitionDidStart();
 
         // touch events
-        bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event);
-        void onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event);
-        void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event);
-        void onTouchCancelled(cocos2d::Touch *touch, cocos2d::Event *event);
         void checkTouch(int num);
 
         // building modification
@@ -58,14 +54,14 @@ namespace wreckingmadness {
         bool updateTop(Direction direction);
 
         // miscellaneous
-        void screenCapturedCallback(bool succeed, const std::string &outputFile);
+        void screenCapturedCallback(bool succeed, const std::string& outputFile);
         void shareScore();
 
         // game effects
         void spanCloud(bool random);
         void throwBall(int direction, bool stopped, float height);
         static void playCrashSound(bool metal);
-        void percReceived(float perc);
+        void percentileReceivedCallback(float perc);
 
 #if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
         void shareScreen(std::string file, std::string title);

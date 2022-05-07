@@ -1,10 +1,11 @@
-#include <Utilities.h>
 #include "MainMenuScene.h"
+
 #include "GameScene.h"
-#include "Common.h"
-#include "SdkBoxHelper.h"
 #include "SettingsScene.h"
-#include "editor-support/cocostudio/SimpleAudioEngine.h"
+#include "Utilities.h"
+#include "Common.h"
+#include "SoundService.h"
+#include "../Integrations/SdkBoxHelper.h"
 
 using namespace cocos2d;
 using namespace wreckingmadness;
@@ -66,13 +67,10 @@ bool MainMenuScene::init() {
         spanCloud(true);
 
     // sounds
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(SOUND_HIT);
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(SOUND_METAL_HIT);
-    if (UserDefault::getInstance()->getBoolForKey(CONFIG_KEY_MUSIC_ENABLED, true) &&
-        !CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
-        CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(MUSIC_BACKGROUND, true);
+    SoundService::preloadEffects();
+    SoundService::playBackgroundMusic();
 
-    wreckingmadness::SdkBoxHelper::PluginInit();
+    SdkBoxHelper::PluginInit();
     return true;
 }
 
@@ -111,13 +109,12 @@ void MainMenuScene::onExitTransitionDidFinish() {
 
 void MainMenuScene::startGame() {
     SdkBoxHelper::CloseAd(AdType::GAMEOVER);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(SOUND_HIT);
+    SoundService::playEffect(Effect::HIT);
     auto transition = TransitionFade::create(0.5, GameScene::createScene());
     Director::getInstance()->replaceScene(transition);
 }
 
 void MainMenuScene::menuCloseCallback() {
-    CocosDenshion::SimpleAudioEngine::getInstance()->unloadEffect(SOUND_HIT);
     Director::getInstance()->end();
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     exit(0);
@@ -125,6 +122,6 @@ void MainMenuScene::menuCloseCallback() {
 }
 
 void MainMenuScene::menuSettingsCallback() {
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(SOUND_HIT);
+    SoundService::playEffect(Effect::HIT);
     Common::enterSettingsScene();
 }

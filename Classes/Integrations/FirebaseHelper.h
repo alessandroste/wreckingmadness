@@ -8,8 +8,7 @@
 #endif
 
 namespace wreckingmadness {
-    class FirebaseHelper
-    {
+    class FirebaseHelper {
     private:
 #ifdef FIREBASE
         std::unique_ptr<firebase::App> _pFirebaseApp;

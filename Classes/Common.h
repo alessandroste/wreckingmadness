@@ -23,21 +23,13 @@
 #define TOAST_HORIZONTAL_FILL 0.9f
 #define FILL 2.2f
 
-// Audio
-#define SOUND_HIT "hit.wav"
-#define SOUND_METAL_HIT "metal_hit.wav"
-#define MUSIC_BACKGROUND "wreckingsound.wav"
-
 // Storage
 #define CONFIG_KEY_PLAYER_ID "playerid"
 #define CONFIG_KEY_TOP_SCORE "ts"
-#define CONFIG_KEY_MUSIC_ENABLED "musicEnabled"
 
 // Messages
 
 #include "cocos2d.h"
-#include "network\HttpClient.h"
-#include "Scenes\MainMenuScene.h"
 
 namespace wreckingmadness {
     class Common {
@@ -51,9 +43,7 @@ namespace wreckingmadness {
         static cocos2d::Color4B BoltColor;
         static cocos2d::Color4B BoltColorDark;
         static cocos2d::Color4B ToastBackgroundColor;
-
-        Common();
-        ~Common();
+        static cocos2d::Color4B ScorePercentageTextColor;
 
         // game sprites
         static cocos2d::Sprite* spanCloud();
@@ -61,12 +51,8 @@ namespace wreckingmadness {
 
         // currentScore
         static unsigned int getTopLocalScore();
-        static void setTopLocalScore(unsigned int score);
-        static void sendScore(unsigned int score);
+        static void processScore(unsigned int currentScore, std::function<void(float)>const& scoreUpdateCallback);
         static bool getPlayerID();
-        void onHttpRequestCompleted(
-            cocos2d::network::HttpClient* sender,
-            cocos2d::network::HttpResponse* response);
 
         static void enterSettingsScene();
         static void enterMainMenuScene();

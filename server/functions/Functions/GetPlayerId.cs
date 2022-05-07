@@ -21,7 +21,7 @@ namespace WreckingMadness.Functions
         {
         }
 
-        [FunctionName("GetNewPlayerId")]
+        [FunctionName("GetPlayerId")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest request,
             ILogger logger,
@@ -42,7 +42,7 @@ namespace WreckingMadness.Functions
                 }
                 catch (CosmosException cosmosException)
                 {
-                    logger.LogError(cosmosException, $"Received exception from Cosmos");
+                    logger.LogError(cosmosException, "Received exception from Cosmos");
                     return new StatusCodeResult((int)HttpStatusCode.ServiceUnavailable);
                 }
             } while (!cancellationToken.IsCancellationRequested);

@@ -11,10 +11,10 @@ using namespace wreckingmadness;
 
 std::string SdkBoxHelper::AdTypeString(AdType adType) {
     switch (adType) {
-        case AdType::GAMEOVER:
-            return "gameover";
-        default:
-            throw std::exception();
+    case AdType::GAMEOVER:
+        return "gameover";
+    default:
+        throw std::exception();
     }
 }
 
