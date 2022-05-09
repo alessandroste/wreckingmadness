@@ -63,3 +63,16 @@ void SoundService::playBackgroundMusic() {
     else if (!isMusicEnabled && isMusicPlaying)
         CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic(MUSIC_BACKGROUND);
 }
+
+void SoundService::pauseAll() {
+    CCLOG("[SoundService] Pausing all audio");
+    CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
+    CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+}
+
+void SoundService::resumeAll() {
+    CCLOG("[SoundService] Resuming all audio");
+    CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
+    if (SoundService::isBackgroundMusicEnabled())
+        CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+}

@@ -1,10 +1,10 @@
 #include "AppDelegate.h"
 
 #include <utility>
-#include "editor-support/cocostudio/SimpleAudioEngine.h"
 #include "Scenes/MainMenuScene.h"
 #include "Integrations/SdkBoxHelper.h"
 #include "Utilities.h"
+#include "SoundService.h"
 
 using namespace cocos2d;
 using namespace wreckingmadness;
@@ -80,27 +80,23 @@ bool AppDelegate::applicationDidFinishLaunching() {
 // This function will be called when the app is inactive. When comes a phone call,it's be invoked too
 void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
-    CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
-    if (UserDefault::getInstance()->getBoolForKey("music", true))
-        CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+    SoundService::pauseAll();
 }
 
 // this function will be called when the app is active again
 void AppDelegate::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
-    CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
-    if (UserDefault::getInstance()->getBoolForKey("music", true))
-        CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+    SoundService::resumeAll();
 }
 
 void AppDelegate::setSearchPaths() {
-    auto director = cocos2d::Director::getInstance();
-    CCLOG("Content scale factor %f", director->getContentScaleFactor());
+    auto director = Director::getInstance();
+    CCLOG("[AppDelegate] Content scale factor %f", director->getContentScaleFactor());
     std::vector<std::string> searchOrder;
     if (director->getContentScaleFactor() >= 3.0)
         searchOrder.emplace_back("4x");
     if (director->getContentScaleFactor() >= 1.5)
         searchOrder.emplace_back("2x");
     searchOrder.emplace_back("1x");
-    cocos2d::FileUtils::getInstance()->setSearchPaths(searchOrder);
+    FileUtils::getInstance()->setSearchPaths(searchOrder);
 }

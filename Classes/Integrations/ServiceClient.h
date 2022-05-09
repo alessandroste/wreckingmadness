@@ -6,31 +6,47 @@
 
 #define SERVICE_BASE_URI "http://localhost:7071/api"
 #define SERVICE_ENDPOINT_GETPLAYERID "GetPlayerId"
-#define SERVICE_ENDPOINT_UPDATESCORE "UpdateTopScoreForPlayer"
+#define SERVICE_ENDPOINT_UPDATESCORE "UpdateScore"
 #define SERVICE_AUTH_HEADER "x-functions-key:"
+#define SERVICE_CONTENT_TYPE_HEADER "Content-Type:"
 
 #ifndef SERVICE_KEY
 #define SERVICE_KEY "testKey"
 #endif
 
+typedef std::function<void(std::string&)> GetPlayerIdSuccessCallback;
+typedef std::function<void(float)> ScoreUpdateSuccessCallback;
+typedef std::function<void()> GetPlayerIdFailureCallback;
+typedef std::function<void()> ScoreUpdateFailureCallback;
+
 namespace wreckingmadness {
     class ServiceClient {
     private:
+        static ServiceClient* serviceClient;
         ServiceClient();
 
         cocos2d::network::HttpClient* httpClient;
-        std::function<void(std::string&)> getPlayerIdCallback;
-        std::function<void(float)> scoreUpdateCallback;
+        GetPlayerIdSuccessCallback getPlayerIdSuccessCallback;
+        GetPlayerIdFailureCallback getPlayerIdFailureCallback;
+        ScoreUpdateSuccessCallback scoreUpdateSuccessCallback;
+        ScoreUpdateFailureCallback scoreUpdateFailureCallback;
 
         static std::string getEndpointUrl(std::string& endpointPath);
-        static std::vector<std::string> getDefaultHeaders();
+        static void setDefaultHeaders(cocos2d::network::HttpRequest& request);
+        static void setHeader(std::vector<std::string>& headers, const char* key, const char* value);
     public:
         static ServiceClient& getInstance();
         ~ServiceClient();
 
         void handleResponse(cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* response);
-        void getNewPlayerId(std::function<void(std::string&)> const& playerIdCallback);
-        void sendScore(std::string& playerId, unsigned int score, std::function<void(float)>const& scoreUpdateCallback);
+        void getNewPlayerId(
+            GetPlayerIdSuccessCallback const& playerIdSuccessCallback,
+            GetPlayerIdFailureCallback const& playerIdFailureCallback);
+        void sendScore(
+            std::string& playerId,
+            unsigned int score,
+            ScoreUpdateSuccessCallback const& scoreUpdateSuccessCallback,
+            ScoreUpdateFailureCallback const& scoreUpdateFailureCallback);
     };
 }
 

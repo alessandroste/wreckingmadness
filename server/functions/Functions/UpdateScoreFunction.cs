@@ -29,14 +29,13 @@ namespace WreckingMadness.Functions
             CancellationToken cancellationToken)
         {
             logger.LogInformation($"Updating score");
-
-            var data = await JsonSerializer.DeserializeAsync<Player>(request.Body, cancellationToken: cancellationToken);
+            var data = await JsonSerializer.DeserializeAsync<Player>(request.Body, new JsonSerializerOptions(JsonSerializerDefaults.Web), cancellationToken);
             if (data == null)
             {
                 return new BadRequestObjectResult($"Cannot parse body.");
             }
 
-            if (data.Identifier == default || data.TopScore == default)
+            if (data.Id == default || data.TopScore == default)
             {
                 return new BadRequestObjectResult($"Request is invalid");
             }
@@ -51,11 +50,11 @@ namespace WreckingMadness.Functions
                 if (!created)
                 {
                     logger.LogInformation("Creation failed, checking if update is needed");
-                    var currentItem = await container.ReadItemAsync<Player>(data.Identifier.ToString(), PartitionKey.None, cancellationToken: cancellationToken);
+                    var currentItem = await container.ReadItemAsync<Player>(data.Id.ToString(), new PartitionKey(data.Id.ToString()), cancellationToken: cancellationToken);
                     if (!currentItem.Resource.TopScore.HasValue || currentItem.Resource.TopScore.Value < data.TopScore)
                     {
                         logger.LogInformation("Score needs to be updated");
-                        await container.UpsertItemAsync(data, PartitionKey.None, cancellationToken: cancellationToken);
+                        await container.UpsertItemAsync(data, cancellationToken: cancellationToken);
                     }
                     else
                     {
@@ -81,7 +80,7 @@ namespace WreckingMadness.Functions
         {
             try
             {
-                var result = await container.CreateItemAsync(data, PartitionKey.None, cancellationToken: cancellationToken);
+                var result = await container.CreateItemAsync(data, cancellationToken: cancellationToken);
                 return true;
             }
             catch (CosmosException cosmosException) when (cosmosException.StatusCode == HttpStatusCode.Conflict)
@@ -92,17 +91,21 @@ namespace WreckingMadness.Functions
 
         private static async Task<float> GetPercentileAsync(Container container, uint score, string collectionName, CancellationToken cancellationToken)
         {
-            var queryDefinition = new QueryDefinition(@$"
-                SELECT (SELECT COUNT(1) * 100
+            var lowerScoresQueryDefinition = new QueryDefinition(@$"
+                SELECT VALUE COUNT(1)
                 FROM {collectionName} s
-                WHERE s.topScore < {score})/
-                (SELECT COUNT()
-                FROM {collectionName} s) AS percentage
+                WHERE s.topScore < {score}
+            ");
+            var allScoresQueryDefiniton = new QueryDefinition(@$"
+                SELECT VALUE COUNT(1)
+                FROM {collectionName}
             ");
 
-            using var iterator = container.GetItemQueryIterator<float>(queryDefinition);
-            var result = await iterator.ReadNextAsync(cancellationToken);
-            return result.Single();
+            using var partialScoresIterator = container.GetItemQueryIterator<float>(lowerScoresQueryDefinition);
+            var partialScoresResult = await partialScoresIterator.ReadNextAsync(cancellationToken);
+            using var totalScoresIterator = container.GetItemQueryIterator<float>(allScoresQueryDefiniton);
+            var totalScoresResult = await totalScoresIterator.ReadNextAsync(cancellationToken);
+            return partialScoresResult.Single() * 100.0f / totalScoresResult.Single();
         }
     }
 }

@@ -1,10 +1,12 @@
 namespace WreckingMadness.Functions
 {
     using System;
+    using System.Text.Json;
     using Microsoft.Azure.Cosmos.Fluent;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using WreckingMadness.Functions.Common;
     using WreckingMadness.Functions.Model;
 
     public class Startup : FunctionsStartup
@@ -35,6 +37,7 @@ namespace WreckingMadness.Functions
                 }
 
                 var cosmosClientBuilder = new CosmosClientBuilder(endpoint, authKey);
+                cosmosClientBuilder.WithCustomSerializer(new SystemSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web)));
                 return cosmosClientBuilder.Build();
             });
         }

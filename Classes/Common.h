@@ -15,6 +15,7 @@
 #define SPRITE_BUTTON_EXIT_PRESSED "mb_exit_p.png"
 #define SPRITE_BUTTON_RESTART_NORMAL "mb_restart_n.png"
 #define SPRITE_BUTTON_RESTART_PRESSED "mb_restart_p.png"
+#define SPRITE_SPINNER "spinner.png"
 #define TEXT_FONT "fonts/Bungee-Regular.ttf"
 #define TEXT_SIZE_DEFAULT 40.0f
 #define TEXT_SIZE_START TEXT_SIZE_DEFAULT * 1.5f
@@ -28,8 +29,12 @@
 #define CONFIG_KEY_TOP_SCORE "ts"
 
 // Messages
+#define MESSAGE_YOUR_SCORE "score"
+#define MESSAGE_YOUR_TOP_SCORE "your\ntop score"
+#define MESSAGE_GAME_OVER "game over"
 
 #include "cocos2d.h"
+#include "Integrations/ServiceClient.h"
 
 namespace wreckingmadness {
     class Common {
@@ -51,7 +56,7 @@ namespace wreckingmadness {
 
         // currentScore
         static unsigned int getTopLocalScore();
-        static void processScore(unsigned int currentScore, std::function<void(float)>const& scoreUpdateCallback);
+        static void processScore(unsigned int currentScore, ScoreUpdateSuccessCallback const& scoreUpdateSuccessCallback, ScoreUpdateFailureCallback const& scoreUpdateFailureCallback);
         static bool getPlayerID();
 
         static void enterSettingsScene();

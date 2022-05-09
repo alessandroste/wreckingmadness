@@ -22,6 +22,8 @@ namespace wreckingmadness {
         static bool isBackgroundMusicEnabled();
         static void playEffect(Effect effect);
         static void playBackgroundMusic();
+        static void pauseAll();
+        static void resumeAll();
     };
 }
 

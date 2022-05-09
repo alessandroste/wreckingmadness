@@ -21,25 +21,25 @@ unsigned int Common::getTopLocalScore() {
     return UserDefault::getInstance()->getIntegerForKey(CONFIG_KEY_TOP_SCORE, 0);
 }
 
-void Common::processScore(unsigned int currentScore, std::function<void(float)>const& scoreUpdateCallback) {
+void Common::processScore(unsigned int currentScore, ScoreUpdateSuccessCallback const& scoreUpdateSuccessCallback, ScoreUpdateFailureCallback const& scoreUpdateFailureCallback) {
     if (currentScore > getTopLocalScore()) {
         UserDefault::getInstance()->setIntegerForKey(CONFIG_KEY_TOP_SCORE, currentScore);
     }
 
     auto playerId = UserDefault::getInstance()->getStringForKey(CONFIG_KEY_PLAYER_ID, "");
     if (playerId != "")
-        ServiceClient::getInstance().sendScore(playerId, currentScore, scoreUpdateCallback);
+        ServiceClient::getInstance().sendScore(playerId, currentScore, scoreUpdateSuccessCallback, scoreUpdateFailureCallback);
 }
 
 bool Common::getPlayerID() {
     if (UserDefault::getInstance()->getStringForKey(CONFIG_KEY_PLAYER_ID, "") != "")
         return true;
 
-    auto callback = [](const std::string& playerId) {
+    auto successCallback = [](const std::string& playerId) {
         UserDefault::getInstance()->setStringForKey(CONFIG_KEY_PLAYER_ID, playerId);
     };
 
-    ServiceClient::getInstance().getNewPlayerId(callback);
+    ServiceClient::getInstance().getNewPlayerId(successCallback, []() {});
     return false;
 }
 

@@ -66,8 +66,7 @@ bool GameScene::init() {
     generateFloor(true, 0);
 
     // clouds
-    for (int i = 0; i < CLOUD_NUM; i++)
-        spanCloud(true);
+    for (int i = 0; i < CLOUD_NUM; i++) spanCloud(true);
 
     // ball
     ball = new Ball(20);
@@ -145,9 +144,14 @@ void GameScene::endGame() {
     endGameMenu = buildEndGameMenu(currentScore, currentTopScore);
     addChild(endGameMenu, 6);
 
-    Common::processScore(currentScore, [this](float percentage) {
-        percentileReceivedCallback(percentage);
-        });
+    auto failureCallback = [this]() {
+        if (endGameMenu != nullptr && endGameMenu->getChildByName(NODE_SPINNER_NAME) != nullptr) {
+            endGameMenu->getChildByName(NODE_SPINNER_NAME)->setVisible(false);
+            Utilities::makeToast("Could not update score", ToastDuration::SHORT);
+        }
+    };
+
+    Common::processScore(currentScore, [this](float percentage) { percentileReceivedCallback(percentage); }, failureCallback);
 }
 
 void GameScene::restartGame() {
@@ -355,8 +359,8 @@ void GameScene::playCrashSound(bool metal = false) {
 void GameScene::percentileReceivedCallback(float perc) {
     CCLOG("[GameScene] Percentage received by GAME %f", perc);
     if (endGameMenu != nullptr && endGameMenu->getChildByName(NODE_SPINNER_NAME) != nullptr) {
-        auto stream = std::ostringstream();
-        stream << "Better than" << std::endl << std::fixed << std::setprecision(2) << perc << std::endl << "%% of players";
+        std::ostringstream stream;
+        stream << "Better than" << std::endl << std::fixed << std::setprecision(2) << perc << "\%" << std::endl << "of players";
         endGameMenu->getChildByName(NODE_SPINNER_NAME)->removeFromParent();
         auto finalScoreLabel = Label::createWithTTF(stream.str(), TEXT_FONT, TEXT_SIZE_DEFAULT);
         finalScoreLabel->setHorizontalAlignment(TextHAlignment::CENTER);
@@ -473,17 +477,17 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int topScore) {
     auto stripes = DrawNode::create();
     stripes->drawTriangle(Vec2(0, 0), Vec2(-stripewidth, 0), Vec2(0, stripewidth), metalColorLight);
     Vec2 stripe1[4] = {
-            Vec2(-stripewidth - stripedist,0),
-            Vec2(0, stripewidth + stripedist),
-            Vec2(0, stripewidth * 2 + stripedist),
-            Vec2(-stripewidth * 2 - stripedist, 0)
+        Vec2(-stripewidth - stripedist,0),
+        Vec2(0, stripewidth + stripedist),
+        Vec2(0, stripewidth * 2 + stripedist),
+        Vec2(-stripewidth * 2 - stripedist, 0)
     };
     stripes->drawPolygon(stripe1, 4, metalColorLight, 0, Color4F::BLACK);
     Vec2 stripe2[4] = {
-            Vec2(-stripewidth * 2 - stripedist * 2,0),
-            Vec2(0, stripewidth * 2 + stripedist * 2),
-            Vec2(0, stripewidth * 2.8f + stripedist * 2),
-            Vec2(-stripewidth * 2.8f - stripedist * 2, 0)
+        Vec2(-stripewidth * 2 - stripedist * 2,0),
+        Vec2(0, stripewidth * 2 + stripedist * 2),
+        Vec2(0, stripewidth * 2.8f + stripedist * 2),
+        Vec2(-stripewidth * 2.8f - stripedist * 2, 0)
     };
     stripes->drawPolygon(stripe2, 4, metalColorLight, 0, Color4F::BLACK);
     stripes->setPosition(origin +
@@ -513,7 +517,7 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int topScore) {
     engrave->setTextColor(Common::BoltColorDark);
     menu->addChild(engrave);
 
-    auto spinner = Sprite::create("spinner.png");
+    auto spinner = Sprite::create(SPRITE_SPINNER);
     spinner->setName(NODE_SPINNER_NAME);
     spinner->setScale(0.6f);
     spinner->setPosition(origin + Vec2(screenSize.width / 2, screenSize.height / 1.4f));
@@ -522,23 +526,23 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int topScore) {
 
     // all the labels
     auto border = TEXT_SIZE_DEFAULT / 2;
-    auto title_lose = Label::createWithTTF("you lost", TEXT_FONT, TEXT_SIZE_DEFAULT);
-    title_lose->setPosition(origin + Vec2(screenSize.width / 2, screenSize.height / 2 + screenSize.height / FILL - title_lose->getContentSize().height));
-    menu->addChild(title_lose, 1);
-    auto label_score = Label::createWithTTF("currentScore", TEXT_FONT, TEXT_SIZE_CREDITS);
-    label_score->setAnchorPoint(Vec2(0, 0.5));
-    label_score->setPosition(origin + Vec2(screenSize.width / 2 - screenSize.width / FILL + border,
+    auto titleGameOver = Label::createWithTTF(MESSAGE_GAME_OVER, TEXT_FONT, TEXT_SIZE_DEFAULT);
+    titleGameOver->setPosition(origin + Vec2(screenSize.width / 2, screenSize.height / 2 + screenSize.height / FILL - titleGameOver->getContentSize().height));
+    menu->addChild(titleGameOver, 1);
+    auto labelScore = Label::createWithTTF(MESSAGE_YOUR_SCORE, TEXT_FONT, TEXT_SIZE_CREDITS);
+    labelScore->setAnchorPoint(Vec2(0, 0.5));
+    labelScore->setPosition(origin + Vec2(screenSize.width / 2 - screenSize.width / FILL + border,
         screenSize.height / 2 + TEXT_SIZE_CREDITS));
-    menu->addChild(label_score, 1);
-    auto label_top = Label::createWithTTF("your\ntop currentScore", TEXT_FONT, TEXT_SIZE_CREDITS);
-    label_top->setAnchorPoint(Vec2(0, 0.5));
-    label_top->setPosition(origin + Vec2(screenSize.width / 2 - screenSize.width / FILL + border,
+    menu->addChild(labelScore, 1);
+    auto labelTopScore = Label::createWithTTF(MESSAGE_YOUR_TOP_SCORE, TEXT_FONT, TEXT_SIZE_CREDITS);
+    labelTopScore->setAnchorPoint(Vec2(0, 0.5));
+    labelTopScore->setPosition(origin + Vec2(screenSize.width / 2 - screenSize.width / FILL + border,
         screenSize.height / 2 - TEXT_SIZE_CREDITS * 2));
-    menu->addChild(label_top, 1);
+    menu->addChild(labelTopScore, 1);
     auto score_top = Label::createWithTTF(Utilities::to_string(topScore), TEXT_FONT, TEXT_SIZE_DEFAULT);
     score_top->setAnchorPoint(Vec2(1, 0.5));
     score_top->setPosition(origin + Vec2(screenSize.width / 2 + screenSize.width / FILL - border,
-        screenSize.height / 2 - TEXT_SIZE_DEFAULT * 4));
+        screenSize.height / 2 - TEXT_SIZE_CREDITS * 4));
     menu->addChild(score_top, 1);
     auto score_ = Label::createWithTTF(Utilities::to_string(score), TEXT_FONT, TEXT_SIZE_DEFAULT);
     score_->setAnchorPoint(Vec2(1, 0.5));

@@ -1,5 +1,6 @@
 #include "ServiceClient.h"
 #include "json/document.h"
+#include "json/prettywriter.h"
 
 using namespace cocos2d;
 using namespace cocos2d::network;
@@ -17,46 +18,75 @@ ServiceClient& ServiceClient::getInstance() {
     return instance;
 }
 
-void ServiceClient::getNewPlayerId(std::function<void(std::string&)> const& playerIdCallback) {
-    getPlayerIdCallback = playerIdCallback;
+void ServiceClient::getNewPlayerId(
+    GetPlayerIdSuccessCallback const& getPlayerIdSuccessCallback,
+    GetPlayerIdFailureCallback const& getPlayerIdFailureCallback) {
+    this->getPlayerIdSuccessCallback = getPlayerIdSuccessCallback;
+    this->getPlayerIdFailureCallback = getPlayerIdFailureCallback;
     auto url = getEndpointUrl(std::string(SERVICE_ENDPOINT_GETPLAYERID));
     auto request = new HttpRequest();
     request->setRequestType(HttpRequest::Type::GET);
     request->setUrl(url);
     request->setResponseCallback(std::bind(&ServiceClient::handleResponse, this, std::placeholders::_1, std::placeholders::_2));
-    request->setHeaders(getDefaultHeaders());
+    setDefaultHeaders(*request);
     request->setTag(SERVICE_ENDPOINT_GETPLAYERID);
     httpClient->send(request);
+    request->release();
 }
 
-void ServiceClient::sendScore(std::string& playerId, unsigned int topScore, std::function<void(float)> const& scoreUpdateCallback) {
-    this->scoreUpdateCallback = scoreUpdateCallback;
-    auto data = Document();
-    data.SetObject();
-    // data.AddMember("id", playerId, data.GetAllocator());
-    // data.AddMember("topScore", topScore, data.GetAllocator());
+void ServiceClient::sendScore(
+    std::string& playerId,
+    unsigned int topScore,
+    ScoreUpdateSuccessCallback const& scoreUpdateSuccessCallback,
+    ScoreUpdateFailureCallback const& scoreUpdateFailureCallback) {
+    this->scoreUpdateSuccessCallback = scoreUpdateSuccessCallback;
+    this->scoreUpdateFailureCallback = scoreUpdateFailureCallback;
+    Document data(Type::kObjectType);
+    auto& allocator = data.GetAllocator();
+    data.AddMember("id", rapidjson::Value().SetString(playerId.c_str(), allocator), allocator);
+    data.AddMember("topScore", rapidjson::Value().SetUint(topScore), allocator);
     auto url = getEndpointUrl(std::string(SERVICE_ENDPOINT_UPDATESCORE));
     auto request = new HttpRequest();
     request->setRequestType(HttpRequest::Type::POST);
     request->setUrl(url);
     request->setResponseCallback(std::bind(&ServiceClient::handleResponse, this, std::placeholders::_1, std::placeholders::_2));
-    request->setHeaders(getDefaultHeaders());
-    request->setRequestData(data.GetString(), data.GetStringLength());
+    setDefaultHeaders(*request);
+    StringBuffer stringBuffer;
+    Writer<StringBuffer> writer(stringBuffer);
+    data.Accept(writer);
+    std::string dataString(stringBuffer.GetString());
+    CCLOG("[ServiceClient] Sending request with body: %s", dataString.c_str());
+    request->setRequestData(dataString.c_str(), dataString.length());
     request->setTag(SERVICE_ENDPOINT_UPDATESCORE);
     httpClient->send(request);
+    request->release();
 }
 
 void ServiceClient::handleResponse(cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* response) {
     if (std::string(SERVICE_ENDPOINT_GETPLAYERID) == std::string(response->getHttpRequest()->getTag())) {
-        auto result = response->getResponseDataString();
-        getPlayerIdCallback(std::string(result));
+        if (response->getResponseCode() != 200) {
+            getPlayerIdFailureCallback();
+        }
+        else {
+            auto responseData = response->getResponseData();
+            auto result = std::string(&(responseData->front()), responseData->size());
+            Document document;
+            document.Parse(result.c_str());
+            getPlayerIdSuccessCallback(std::string(document.GetString(), document.GetStringLength()));
+        }
     }
     else if (std::string(SERVICE_ENDPOINT_UPDATESCORE) == std::string(response->getHttpRequest()->getTag())) {
-        auto responseData = response->getResponseDataString();
-        auto responseDataDocument = Document();
-        responseDataDocument.Parse(responseData);
-        auto percentage = responseDataDocument["percentile"].GetFloat();
-        scoreUpdateCallback(percentage);
+        if (response->getResponseCode() != 200) {
+            scoreUpdateFailureCallback();
+        }
+        else {
+            auto responseData = response->getResponseData();
+            auto result = std::string(&(responseData->front()), responseData->size());
+            Document document;
+            document.Parse(result.c_str());
+            auto& percentage = document["percentile"];
+            scoreUpdateSuccessCallback(percentage.GetFloat());
+        }
     }
 }
 
@@ -68,8 +98,25 @@ std::string ServiceClient::getEndpointUrl(std::string& endpointPath) {
     return path;
 }
 
-std::vector<std::string> ServiceClient::getDefaultHeaders() {
-    auto headers = std::vector<std::string>();
-    headers.emplace_back(std::string(SERVICE_AUTH_HEADER).append(SERVICE_KEY));
-    return headers;
+void ServiceClient::setDefaultHeaders(HttpRequest& request) {
+    auto& headers = request.getHeaders();
+    setHeader(headers, SERVICE_AUTH_HEADER, SERVICE_KEY);
+    setHeader(headers, SERVICE_CONTENT_TYPE_HEADER, "application/json");
+    request.setHeaders(headers);
+}
+
+void ServiceClient::setHeader(std::vector<std::string>& headers, const char* key, const char* value) {
+    std::string keyToFind(key);
+    auto checkFunction = [keyToFind](const std::string& i) {
+        auto pos = i.find(keyToFind);
+        return pos == 0;
+    };
+
+    auto headerPos = std::find_if(headers.begin(), headers.end(), checkFunction);
+    if (std::end(headers) != headerPos) {
+        *headerPos = keyToFind.append(value);
+    }
+    else {
+        headers.emplace_back(keyToFind.append(value));
+    }
 }

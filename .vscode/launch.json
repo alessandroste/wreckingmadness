@@ -48,5 +48,15 @@
       "request": "attach",
       "processId": "${command:azureFunctions.pickProcess}"
     }
+  ],
+  "compounds": [
+    {
+      "name": "Game and server",
+      "configurations": [
+        "Game debug (Windows)",
+        "Server debug"
+      ],
+      "stopAll": true
+    }
   ]
 }
