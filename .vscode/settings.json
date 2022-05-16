@@ -1,8 +1,6 @@
 {
   "cmake.buildDirectory": "${workspaceFolder}/proj.win32/build",
-  "azureFunctions.deploySubpath": "${workspaceFolder}/server/functions/bin/Release/net6.0/publish",
   "azureFunctions.projectLanguage": "C#",
   "azureFunctions.projectRuntime": "~4",
-  "azureFunctions.preDeployTask": "publish (functions)",
   "azureFunctions.projectSubpath": "server\\functions"
 }

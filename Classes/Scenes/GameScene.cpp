@@ -147,11 +147,14 @@ void GameScene::endGame() {
     auto failureCallback = [this]() {
         if (endGameMenu != nullptr && endGameMenu->getChildByName(NODE_SPINNER_NAME) != nullptr) {
             endGameMenu->getChildByName(NODE_SPINNER_NAME)->setVisible(false);
-            Utilities::makeToast("Could not update score", ToastDuration::SHORT);
+            auto finalScoreLabel = Label::createWithTTF("Well done!", TEXT_FONT, TEXT_SIZE_DEFAULT, Size::ZERO, TextHAlignment::CENTER);
+            finalScoreLabel->setTextColor(Common::ScorePercentageTextColor);
+            finalScoreLabel->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 1.4f));
+            endGameMenu->addChild(finalScoreLabel, 2);
         }
     };
 
-    Common::processScore(currentScore, [this](float percentage) { percentileReceivedCallback(percentage); }, failureCallback);
+    Common::processScore(currentScore, std::bind(&GameScene::percentileReceivedCallback, this, std::placeholders::_1), failureCallback);
 }
 
 void GameScene::restartGame() {
@@ -362,8 +365,7 @@ void GameScene::percentileReceivedCallback(float perc) {
         std::ostringstream stream;
         stream << "Better than" << std::endl << std::fixed << std::setprecision(2) << perc << "\%" << std::endl << "of players";
         endGameMenu->getChildByName(NODE_SPINNER_NAME)->removeFromParent();
-        auto finalScoreLabel = Label::createWithTTF(stream.str(), TEXT_FONT, TEXT_SIZE_DEFAULT);
-        finalScoreLabel->setHorizontalAlignment(TextHAlignment::CENTER);
+        auto finalScoreLabel = Label::createWithTTF(stream.str(), TEXT_FONT, TEXT_SIZE_DEFAULT, Size::ZERO, TextHAlignment::CENTER);
         finalScoreLabel->setTextColor(Common::ScorePercentageTextColor);
         finalScoreLabel->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 1.4f));
         endGameMenu->addChild(finalScoreLabel, 2);
@@ -434,18 +436,6 @@ bool GameScene::updateTop(Direction direction) {
             throwBall(sign, false, y);
             return true;
         }
-        //    case HALF:
-        //        {
-        //            skyscraper->getUpperFloor()->getFloorStatus() = BROKEN;
-        //            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
-        //            return false;
-        //        }
-        //    case GOOD:
-        //        {
-        //            skyscraper->getUpperFloor()->floorStatus = HALF;
-        //            skyscraper->getUpperFloor()->getSprite()->runAction(MoveBy::create(0.01f, Vec2(30 * sign, 0)));
-        //            return false;
-        //        }
     default:
         return false;
     }

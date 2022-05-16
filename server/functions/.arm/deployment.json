@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "metadata": {
+        "description": "The base name to be applied"
+      },
+      "defaultValue": "wreckingmadness"
+    }
+  },
+  "variables": {
+    "fncName": "[concat(parameters('baseName'), '-fn')]",
+    "appPlanRId": "[resourceId('astrotards', 'Microsoft.Web/serverfarms', 'astrotards')]",
+    "fncRId": "[resourceId('Microsoft.Web/sites', variables('fncName'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('fncName')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "location": "northeurope",
+      "kind": "functionapp",
+      "dependsOn": [],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[variables('appPlanRId')]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "AzureWebJobsStorage",
+              "value": ""
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
