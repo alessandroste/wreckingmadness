@@ -61,7 +61,7 @@ namespace wreckingmadness {
         void spanCloud(bool random);
         void throwBall(int direction, bool stopped, float height);
         static void playCrashSound(bool metal);
-        void percentileReceivedCallback(float perc);
+        void percentileReceivedCallback(float percentage);
 
 #if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
         void shareScreen(std::string file, std::string title);

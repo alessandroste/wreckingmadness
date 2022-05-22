@@ -51,6 +51,7 @@ void wreckingmadness::SdkBoxHelper::Init() {
 void wreckingmadness::SdkBoxHelper::PluginInit() {
 #ifdef SDKBOX_ENABLED
     sdkbox::PluginAdMob::init();
+    sdkbox::PluginAdMob::setGDPR(true);
     sdkbox::PluginAdMob::setListener(new AdListener());
     CCLOG("[SdkBoxHelper] Initialized AdMob");
 #ifdef SDKBOX_FACEBOOK

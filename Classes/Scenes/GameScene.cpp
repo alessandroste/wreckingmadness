@@ -359,11 +359,11 @@ void GameScene::playCrashSound(bool metal = false) {
         SoundService::playEffect(Effect::METAL_HIT);
 }
 
-void GameScene::percentileReceivedCallback(float perc) {
-    CCLOG("[GameScene] Percentage received by GAME %f", perc);
+void GameScene::percentileReceivedCallback(float percentage) {
+    CCLOG("[GameScene] Percentage received by GAME %f", percentage);
     if (endGameMenu != nullptr && endGameMenu->getChildByName(NODE_SPINNER_NAME) != nullptr) {
         std::ostringstream stream;
-        stream << "Better than" << std::endl << std::fixed << std::setprecision(2) << perc << "\%" << std::endl << "of players";
+        stream << "Better than" << std::endl << std::fixed << std::setprecision(2) << percentage << "%" << std::endl << "of players";
         endGameMenu->getChildByName(NODE_SPINNER_NAME)->removeFromParent();
         auto finalScoreLabel = Label::createWithTTF(stream.str(), TEXT_FONT, TEXT_SIZE_DEFAULT, Size::ZERO, TextHAlignment::CENTER);
         finalScoreLabel->setTextColor(Common::ScorePercentageTextColor);

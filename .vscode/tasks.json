@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Configure Android",
+      "label": "Game (Android) - CMAKE Configure",
       "type": "shell",
       "command": "C:\\msys64\\mingw64\\bin\\cmake.exe",
       "args": [
@@ -17,7 +17,7 @@
       ]
     },
     {
-      "label": "Build Android",
+      "label": "Game (Android) - Build",
       "type": "shell",
       "command": ".\\gradlew",
       "options": {
@@ -32,7 +32,7 @@
       }
     },
     {
-      "label": "Install Android",
+      "label": "Game (Android) - Install",
       "type": "shell",
       "command": ".\\gradlew",
       "options": {
@@ -47,7 +47,7 @@
       }
     },
     {
-      "label": "Emulator",
+      "label": "Game (Android) - Start emulator",
       "type": "process",
       "isBackground": true,
       "command": "emulator.exe",
@@ -68,7 +68,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Run game (Windows)",
+      "label": "Game (Windows) - Run",
       "type": "process",
       "command": "wreckingmadness.exe",
       "options": {
@@ -76,11 +76,11 @@
       },
       "problemMatcher": [],
       "dependsOn": [
-        "Build (Windows)"
+        "Game (Windows) - Build"
       ]
     },
     {
-      "label": "Build (Windows)",
+      "label": "Game (Windows) - Build",
       "type": "shell",
       "command": "C:\\msys64\\mingw64\\bin\\cmake",
       "args": [
@@ -95,7 +95,7 @@
       }
     },
     {
-      "label": "Forward debug port",
+      "label": "Game (Android) - Forward debug ports",
       "type": "shell",
       "command": "adb",
       "args": [
@@ -109,12 +109,86 @@
       "problemMatcher": []
     },
     {
+      "label": "Server - Deploy infrastructure",
       "type": "shell",
-      "label": "Deploy server resources",
       "windows": {
         "command": "New-AzResourceGroupDeployment -Name VSCodeDeployment -ResourceGroupName wreckingmadness -Mode Incremental -TemplateParameterFile ./server/functions/.arm/deployment.parameters.json -TemplateFile ./server/functions/.arm/deployment.json"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Functions - Clean",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}\\server\\functions"
+      },
+      "args": [
+        "clean",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Functions - Build",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}\\server\\functions"
+      },
+      "args": [
+        "build",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Functions - Clean (Release)",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}\\server\\functions"
+      },
+      "args": [
+        "clean",
+        "--configuration",
+        "Release",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Functions - Publish",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}\\server\\functions"
+      },
+      "args": [
+        "publish",
+        "--configuration",
+        "Release",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "type": "func",
+      "dependsOn": "Functions - Build",
+      "options": {
+        "cwd": "${workspaceFolder}\\server\\functions\\bin\\Debug\\net6.0"
+      },
+      "command": "host start",
+      "isBackground": true,
+      "problemMatcher": "$func-dotnet-watch"
     }
   ]
 }

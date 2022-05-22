@@ -28,7 +28,7 @@
       "cwd": "${workspaceFolder}\\proj.win32\\build\\bin\\wreckingmadness\\Debug",
       "environment": [],
       "console": "internalConsole",
-      "preLaunchTask": "Build (Windows)",
+      "preLaunchTask": "Game (Windows) - Build",
       "symbolOptions": {
         "searchPaths": [
           "${workspaceFolder}\\proj.win32\\build\\bin\\wreckingmadness\\Debug"

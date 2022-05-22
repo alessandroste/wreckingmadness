@@ -31,7 +31,7 @@ namespace wreckingmadness {
         ScoreUpdateSuccessCallback scoreUpdateSuccessCallback;
         ScoreUpdateFailureCallback scoreUpdateFailureCallback;
 
-        static std::string getEndpointUrl(std::string& endpointPath);
+        static std::string getEndpointUrl(const std::string& endpointPath);
         static void setDefaultHeaders(cocos2d::network::HttpRequest& request);
         static void setHeader(std::vector<std::string>& headers, const char* key, const char* value);
     public:

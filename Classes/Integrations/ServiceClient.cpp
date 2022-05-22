@@ -65,6 +65,8 @@ void ServiceClient::sendScore(
 void ServiceClient::handleResponse(cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* response) {
     if (std::string(SERVICE_ENDPOINT_GETPLAYERID) == std::string(response->getHttpRequest()->getTag())) {
         if (response->getResponseCode() != 200) {
+            auto header = response->getResponseHeader();
+            auto error = std::string(&header->front(), header->size());
             getPlayerIdFailureCallback();
         }
         else {
@@ -72,7 +74,8 @@ void ServiceClient::handleResponse(cocos2d::network::HttpClient* client, cocos2d
             auto result = std::string(&(responseData->front()), responseData->size());
             Document document;
             document.Parse(result.c_str());
-            getPlayerIdSuccessCallback(std::string(document.GetString(), document.GetStringLength()));
+            auto id = std::string(document.GetString(), document.GetStringLength());
+            getPlayerIdSuccessCallback(id);
         }
     }
     else if (std::string(SERVICE_ENDPOINT_UPDATESCORE) == std::string(response->getHttpRequest()->getTag())) {
@@ -90,7 +93,7 @@ void ServiceClient::handleResponse(cocos2d::network::HttpClient* client, cocos2d
     }
 }
 
-std::string ServiceClient::getEndpointUrl(std::string& endpointPath) {
+std::string ServiceClient::getEndpointUrl(const std::string& endpointPath) {
     std::string path(SERVICE_BASE_URI);
     if (path[path.length() - 1] != '/')
         path.append("/");
@@ -99,7 +102,7 @@ std::string ServiceClient::getEndpointUrl(std::string& endpointPath) {
 }
 
 void ServiceClient::setDefaultHeaders(HttpRequest& request) {
-    auto& headers = request.getHeaders();
+    auto headers = request.getHeaders();
     setHeader(headers, SERVICE_AUTH_HEADER, SERVICE_KEY);
     setHeader(headers, SERVICE_CONTENT_TYPE_HEADER, "application/json");
     request.setHeaders(headers);

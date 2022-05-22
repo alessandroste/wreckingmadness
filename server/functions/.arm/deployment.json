@@ -8,21 +8,43 @@
         "description": "The base name to be applied"
       },
       "defaultValue": "wreckingmadness"
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The Azure location"
+      },
+      "defaultValue": "[resourceGroup().location]"
     }
   },
   "variables": {
     "fncName": "[concat(parameters('baseName'), '-fn')]",
+    "storageAccountName": "[concat(parameters('baseName'), 'store')]",
     "appPlanRId": "[resourceId('astrotards', 'Microsoft.Web/serverfarms', 'astrotards')]",
+    "storageAccountRId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
     "fncRId": "[resourceId('Microsoft.Web/sites', variables('fncName'))]"
   },
   "resources": [
     {
+      "name": "[variables('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      }
+    },
+    {
       "name": "[variables('fncName')]",
       "type": "Microsoft.Web/sites",
       "apiVersion": "2018-11-01",
-      "location": "northeurope",
+      "location": "[parameters('location')]",
       "kind": "functionapp",
-      "dependsOn": [],
+      "dependsOn": [
+        "[variables('storageAccountRId')]"
+      ],
       "identity": {
         "type": "SystemAssigned"
       },
@@ -32,7 +54,7 @@
           "appSettings": [
             {
               "name": "AzureWebJobsStorage",
-              "value": ""
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountRId'),'2015-05-01-preview').key1)]"
             },
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -47,5 +69,10 @@
       }
     }
   ],
-  "outputs": {}
+  "outputs": {
+    "functionResourceId": {
+      "type": "string",
+      "value": "[variables('fncRId')]"
+    }
+  }
 }

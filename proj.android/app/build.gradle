@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def secretsFile = rootProject.file("secrets.properties")
+def secrets = new Properties()
+if (secretsFile.exists()) {
+    secrets.load(new FileInputStream(secretsFile))
+}
+
 android {
     compileSdkVersion PROP_COMPILE_SDK_VERSION.toInteger()
 
@@ -7,8 +13,8 @@ android {
         applicationId "com.ales.wreckingmadness"
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "3.0"
 
         externalNativeBuild {
             cmake {
@@ -57,6 +63,22 @@ android {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 signingConfig signingConfigs.release
             }
+
+            if (secrets.hasProperty("SERVICE_KEY")) {
+                externalNativeBuild {
+                    cmake {
+                        cppFlags.addAll(["-DSERVICE_KEY="+secrets["SERVICE_KEY"]])
+                    }
+                }
+            }
+
+            if (secrets.hasProperty("SERVICE_BASE_URI")) {
+                externalNativeBuild {
+                    cmake {
+                        cppFlags.addAll(["-DSERVICE_BASE_URI="+secrets["SERVICE_BASE_URI"]])
+                    }
+                }
+                    }
         }
     }
     
