@@ -72,7 +72,6 @@ bool AppDelegate::applicationDidFinishLaunching() {
 #endif
 
     SdkBoxHelper::Init();
-    SdkBoxHelper::CacheAd(AdType::GAMEOVER);
     director->runWithScene(MainMenuScene::createScene());
     return true;
 }

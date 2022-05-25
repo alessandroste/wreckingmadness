@@ -25,6 +25,8 @@ THE SOFTWARE.
 package com.ales.wreckingmadness;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
@@ -33,6 +35,7 @@ import android.view.WindowManager;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
+import java.util.List;
 
 public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
     @Override
@@ -63,6 +66,13 @@ public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
         final File photoFile = new File(getFilesDir(), fileName);
         final Uri uri = FileProvider.getUriForFile(this, fileProviderAuthority, photoFile);
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        startActivity(Intent.createChooser(shareIntent, "Share image using"));
+        final Intent chooser = Intent.createChooser(shareIntent, "Share image using");
+        final List<ResolveInfo> resInfoList = this.getPackageManager().queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            this.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+        
+        startActivity(chooser);
     }
 }

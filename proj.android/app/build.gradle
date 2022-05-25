@@ -13,8 +13,8 @@ android {
         applicationId "com.ales.wreckingmadness"
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
-        versionCode 3
-        versionName "3.0"
+        versionCode 4
+        versionName "3.1"
 
         externalNativeBuild {
             cmake {
@@ -42,9 +42,9 @@ android {
             path "../../CMakeLists.txt"
         }
     }
-
+    
     signingConfigs {
-       release {
+        release {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 storeFile file(RELEASE_STORE_FILE)
                 storePassword RELEASE_STORE_PASSWORD
@@ -78,7 +78,7 @@ android {
                         cppFlags.addAll(["-DSERVICE_BASE_URI="+secrets["SERVICE_BASE_URI"]])
                     }
                 }
-                    }
+            }
         }
     }
     

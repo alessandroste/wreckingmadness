@@ -8,19 +8,20 @@
 namespace wreckingmadness {
     class MainMenuScene : public cocos2d::LayerColor {
     private:
-        void startGame();
+        static void startGame();
         void update(float dt);
-        cocos2d::Vec2 vorigin;
-        cocos2d::Size vsize;
-        cocos2d::Node *sprite_ball;
+        cocos2d::Vec2 vOrigin;
+        cocos2d::Size viewSize;
+        cocos2d::Node* ballSprite;
         float deltatime;
         Ball* ball;
     public:
         CREATE_FUNC(MainMenuScene);
         static cocos2d::Scene* createScene();
         virtual bool init();
-        void menuCloseCallback();
-        void menuSettingsCallback();
+        
+        static void menuCloseCallback();
+        static void menuSettingsCallback();
         void spanCloud(bool random);
         void onEnterTransitionDidFinish();
         void onExitTransitionDidFinish();

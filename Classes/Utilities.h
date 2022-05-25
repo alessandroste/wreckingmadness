@@ -24,6 +24,8 @@ namespace wreckingmadness {
         static void makeToast(std::string const& text, ToastDuration duration);
         static float getRandom();
         static int getRandom(int min, int max);
+        template <typename ...Args>
+        static std::string formatString(const std::string& format, Args && ...args);
     };
 
     template <typename T>
@@ -31,6 +33,15 @@ namespace wreckingmadness {
         std::ostringstream os;
         os << value;
         return os.str();
+    }
+
+    template <typename ...Args>
+    std::string Utilities::formatString(const std::string& format, Args && ...args)
+    {
+        auto size = std::snprintf(nullptr, 0, format.c_str(), std::forward<Args>(args)...);
+        std::string output(size + 1, '\0');
+        std::sprintf(&output[0], format.c_str(), std::forward<Args>(args)...);
+        return output;
     }
 }
 

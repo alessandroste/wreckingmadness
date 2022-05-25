@@ -19,10 +19,11 @@
 #define TEXT_FONT "fonts/Bungee-Regular.ttf"
 #define TEXT_SIZE_DEFAULT 40.0f
 #define TEXT_SIZE_START TEXT_SIZE_DEFAULT * 1.5f
-#define TEXT_SIZE_CREDITS 25.0f
+#define TEXT_SIZE_CREDITS 22.0f
 #define TOAST_MIN_HEIGHT 20.0f
 #define TOAST_HORIZONTAL_FILL 0.9f
 #define FILL 2.2f
+#define FILL_FACTOR 0.9f
 
 // Storage
 #define CONFIG_KEY_PLAYER_ID "playerid"

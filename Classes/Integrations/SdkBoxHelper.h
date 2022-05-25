@@ -10,9 +10,9 @@ namespace wreckingmadness {
     {
     private:
         static std::string AdTypeString(AdType adType);
+        static const std::string Configuration;
     public:
         static void Init();
-        static void PluginInit();
         static bool FacebookLogout();
         static void CloseAd(AdType adType);
         static void CacheAd(AdType adType);

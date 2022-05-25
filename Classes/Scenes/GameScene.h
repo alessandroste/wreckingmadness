@@ -30,7 +30,7 @@ namespace wreckingmadness {
         float floorWidth;
         std::string outfile;
         unsigned int currentScore;
-        cocos2d::Node* buildEndGameMenu(unsigned int score, int top_score);
+        static cocos2d::Node* buildEndGameMenu(unsigned int score, int top_score);
         bool isTouchDown;
         float initialTouchPos[2];
         float currentTouchPos[2];
@@ -54,21 +54,14 @@ namespace wreckingmadness {
         bool updateTop(Direction direction);
 
         // miscellaneous
-        void screenCapturedCallback(bool succeed, const std::string& outputFile);
-        void shareScore();
+        static void screenCapturedCallback(bool succeed, const std::string& outputFile);
+        static void shareScore();
 
         // game effects
         void spanCloud(bool random);
         void throwBall(int direction, bool stopped, float height);
         static void playCrashSound(bool metal);
         void percentileReceivedCallback(float percentage);
-
-#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
-        void shareScreen(std::string file, std::string title);
-        void closeShare();
-        void checkPostPerm();
-        void shareDialog();
-#endif
     };
 }
 

@@ -6,7 +6,6 @@ using namespace cocos2d;
 using namespace wreckingmadness;
 
 void AdListener::adViewDidReceiveAd(const std::string& name) {
-    sdkbox::PluginAdMob::show("gameover");
     CCLOG("[AdListener] Ad %s received", name.c_str());
 }
 

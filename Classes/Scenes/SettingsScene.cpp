@@ -41,7 +41,7 @@ bool SettingsScene::init() {
         addChild(menu);
     }
 #endif
-    auto credits = "wrecking madness is a simple game written" \
+    auto credits = "wrecking madness is a simple game written " \
         "in C++ thanks to the awesome cocos2dx library.\n" \
         "Many free resources have been used, credits to " \
         "kenney.nl for sprites (some retouched).";

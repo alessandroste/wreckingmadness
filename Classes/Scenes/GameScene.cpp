@@ -12,9 +12,6 @@
 #include "SoundService.h"
 #ifdef SDKBOX_ENABLED
 #include "PluginAdMob/PluginAdMob.h"
-#ifdef SDKBOX_FACEBOOK
-#include "FacebookListener.h"
-#endif
 #endif
 
 using namespace cocos2d;
@@ -115,10 +112,7 @@ bool GameScene::init() {
     // difficulty
     currentSpeed = MIN_VELOCITY;
     speedSetPoint = currentSpeed;
-
-#ifdef SDKBOX_FACEBOOK
-    sdkbox::PluginFacebook::setListener(new FacebookListener());
-#endif
+    
     return true;
 }
 
@@ -198,8 +192,7 @@ void GameScene::update(float dt) {
             end = true;
             ball->getNode()->removeFromParent();
             endGame();
-        }
-        else if (!end) {
+        } else if (!end) {
             if (currentSpeed < speedSetPoint)
                 currentSpeed += VEL_STEP;
             for (int i = 0; i < num; i++) {
@@ -216,87 +209,19 @@ void GameScene::update(float dt) {
 void GameScene::screenCapturedCallback(bool succeed, const std::string& outputFile) {
     SdkBoxHelper::ShowAd(AdType::GAMEOVER);
     if (succeed) {
-#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
-        outfile = outputFile;
-        if (!sdkbox::PluginFacebook::isLoggedIn()) {
-            sdkbox::PluginFacebook::login();
-        }
-        else {
-            checkPostPerm();
-        }
-#else
         Utilities::makeToast("Screenshot done", ToastDuration::SHORT);
         Director::getInstance()->pause();
         PlatformAbstraction::getInstance()->shareImageFromFile(SCREEN_FILE);
         Director::getInstance()->resume();
-#endif
     }
     else {
         Utilities::makeToast("Error encountered while doing screenshot", ToastDuration::SHORT);
     }
 }
 
-#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
-void GameScene::closeShare() {
-    getChildByName("popup")->removeAllChildren();
-    getChildByName("popup")->removeFromParent();
-    endGameMenu->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_restart")->setEnabled(true);
-    endGameMenu->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_exit")->setEnabled(true);
-    endGameMenu->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_share")->setEnabled(true);
-    sdkbox::PluginAdMob::show("gameover");
-}
-
-void GameScene::checkPostPerm() {
-    bool found = false;
-    for (auto& permission : sdkbox::PluginFacebook::getPermissionList()) {
-        if (permission.data() == sdkbox::FB_PERM_PUBLISH_POST) {
-            found = true;
-            CCLOG("Found permission to publish");
-            break;
-        }
-    }
-    if (!found) {
-        CCLOG("Not found permission to publish");
-        sdkbox::PluginFacebook::requestPublishPermissions({ sdkbox::FB_PERM_PUBLISH_POST });
-    }
-    else {
-        shareDialog();
-    }
-}
-
-void GameScene::shareDialog() {
-    Layer* popup = Layer::create();
-    ui::ImageView* scr = ui::ImageView::create();
-    scr->loadTexture(outfile);
-    scr->setScale(0.4);
-    scr->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height * 2.2 / 3));
-    popup->addChild(scr, 2);
-    popup->setName("popup");
-    DrawNode* shadow = DrawNode::create();
-    shadow->drawSolidRect(Vec2(visibleOrigin.x, visibleOrigin.y), visibleOrigin + Vec2(visibleSize.width, visibleSize.height), Color4F::BLACK);
-    popup->addChild(shadow);
-    MenuItemImage* button_go = MenuItemImage::create("mb_share_n.png", "mb_share_p.png",
-        CC_CALLBACK_0(GameScene::shareScreen, this, outfile, ""));
-    button_go->setName("btn_go");
-    MenuItemImage* button_ret = MenuItemImage::create("mb_ret_n.png", "mb_ret_p.png",
-        CC_CALLBACK_0(GameScene::closeShare, this));
-    button_ret->setName("btn_ret");
-    Menu* menu_go = Menu::createWithArray({ button_ret, button_go });
-    menu_go->alignItemsHorizontally();
-    menu_go->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 4 - com->text_size));
-    menu_go->setName("menu_go");
-    popup->addChild(menu_go, 2);
-    addChild(popup, 10);
-    endGameMenu->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_restart")->setEnabled(false);
-    endGameMenu->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_exit")->setEnabled(false);
-    endGameMenu->getChildByName("btns")->getChildByName<MenuItemImage*>("btn_share")->setEnabled(false);
-    sdkbox::PluginAdMob::hide("gameover");
-}
-#endif
-
 void GameScene::shareScore() {
     SdkBoxHelper::CloseAd(AdType::GAMEOVER);
-    utils::captureScreen(CC_CALLBACK_2(GameScene::screenCapturedCallback, this), SCREEN_FILE);
+    utils::captureScreen(std::bind(&GameScene::screenCapturedCallback, std::placeholders::_1, std::placeholders::_2), SCREEN_FILE);
 }
 
 void GameScene::spanCloud(bool random) {
@@ -321,9 +246,9 @@ void GameScene::spanCloud(bool random) {
 void GameScene::throwBall(int direction = 1, bool stopped = false, float height = 0) {
     if (!throwing) {
         throwing = true;
-        auto ballNode = this->ball->getNode();
-        auto ballRadius = this->ball->getRadius();
-        auto ballLength = this->ball->getLength();
+        auto ballNode = ball->getNode();
+        auto ballRadius = ball->getRadius();
+        auto ballLength = ball->getLength();
         auto xPos = (direction < 0) ?
             visibleOrigin.x + visibleSize.width + ballRadius * scale :
             visibleOrigin.x - ballRadius * scale;
@@ -335,7 +260,7 @@ void GameScene::throwBall(int direction = 1, bool stopped = false, float height 
             ballNode->runAction(Sequence::create(
                 MoveBy::create(space1 / BREAK_SPEED, Vec2(direction * space1, 0)),
                 CallFunc::create(std::bind(&GameScene::playCrashSound, false)),
-                CallFunc::create(CC_CALLBACK_0(GameScene::removeTop, this, direction)),
+                CallFunc::create(std::bind(&GameScene::removeTop, this, direction)),
                 DelayTime::create(0.02f),
                 MoveBy::create(space / BREAK_SPEED, Vec2(direction * space, 0)),
                 CallFunc::create(std::bind([this] { throwing = false; })),
@@ -360,42 +285,30 @@ void GameScene::playCrashSound(bool metal = false) {
 }
 
 void GameScene::percentileReceivedCallback(float percentage) {
-    CCLOG("[GameScene] Percentage received by GAME %f", percentage);
+    CCLOG("[GameScene] Percentage received %f", percentage);
     if (endGameMenu != nullptr && endGameMenu->getChildByName(NODE_SPINNER_NAME) != nullptr) {
-        std::ostringstream stream;
-        stream << "Better than" << std::endl << std::fixed << std::setprecision(2) << percentage << "%" << std::endl << "of players";
         endGameMenu->getChildByName(NODE_SPINNER_NAME)->removeFromParent();
-        auto finalScoreLabel = Label::createWithTTF(stream.str(), TEXT_FONT, TEXT_SIZE_DEFAULT, Size::ZERO, TextHAlignment::CENTER);
+        auto message = Utilities::formatString("Better than %.2f%% of players", percentage);
+        auto finalScoreLabel = Label::createWithTTF(message, TEXT_FONT, TEXT_SIZE_DEFAULT, Size::ZERO, TextHAlignment::CENTER);
+        finalScoreLabel->setMaxLineWidth(endGameMenu->getBoundingBox().size.width);
         finalScoreLabel->setTextColor(Common::ScorePercentageTextColor);
         finalScoreLabel->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 1.4f));
         endGameMenu->addChild(finalScoreLabel, 2);
     }
 }
 
-#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
-void GameScene::shareScreen(std::string file, std::string title) {
-    sdkbox::FBShareInfo info;
-    info.type = sdkbox::FB_PHOTO;
-    info.title = title;
-    info.image = file;
-    sdkbox::PluginFacebook::share(info);
-    getChildByName("popup")->getChildByName("menu_go")->getChildByName<MenuItemImage*>("btn_go")->setEnabled(false);
-    getChildByName("popup")->getChildByName("menu_go")->getChildByName<MenuItemImage*>("btn_ret")->setEnabled(false);
-    Sprite* spinner = Sprite::create("spinner.png");
-    spinner->setName("spinner");
-    spinner->setScale(0.6);
-    spinner->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 1.4));
-    spinner->runAction(RepeatForever::create(RotateBy::create(0.1, 2 * M_PI)));
-    getChildByName("popup")->addChild(spinner, 15);
-}
-#endif
-
 void GameScene::generateFloor(bool roof, float correction) {
     auto y = roof ? visibleOrigin.y : skyscraper->getLowerFloor()->getSprite()->getPositionY();
     auto floor = new Floor(FloorStatus::BROKEN, roof ? FloorType::ROOF : Floor::getRandomFloorType());
+    if (floor->getSprite()->getContentSize().width > FILL_FACTOR * visibleSize.width) {
+        auto maxFloorWidth = FILL_FACTOR * visibleSize.width;
+        auto maxFloorScale = maxFloorWidth / floor->getSprite()->getContentSize().width;
+        floor->getSprite()->setScale(maxFloorScale);
+    }
+    
     floorWidth = floor->getSprite()->getBoundingBox().size.width;
-    auto sprite_height = floor->getSprite()->getContentSize().height;
-    floor->getSprite()->setPosition((Vec2(visibleOrigin.x + visibleSize.width / 2, y - sprite_height + correction)));
+    auto spriteHeight = floor->getSprite()->getBoundingBox().size.height;
+    floor->getSprite()->setPosition((Vec2(visibleOrigin.x + visibleSize.width / 2, y - spriteHeight + correction)));
     addChild(floor->getSprite(), 3);
     skyscraper->addFloor(floor);
 }
@@ -403,7 +316,7 @@ void GameScene::generateFloor(bool roof, float correction) {
 void GameScene::removeTop(int dir) {
     if (!end) {
         // this space has to be the same also for floor
-        float space = visibleSize.width + floorWidth;
+        auto space = visibleSize.width + floorWidth;
         skyscraper->getUpperFloor()->getSprite()->runAction(Sequence::create(
             MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
             RemoveSelf::create(),
@@ -485,25 +398,25 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int topScore) {
     menu->addChild(stripes);
 
     // drawing bolts
-    auto boltradius = 6.0f;
+    auto boltRadius = 6.0f;
     auto bolt1 = DrawNode::create();
     auto bolt2 = DrawNode::create();
     auto bolt3 = DrawNode::create();
     auto bolt4 = DrawNode::create();
-    bolt1->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltColor);
-    bolt2->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltColor);
-    bolt3->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltColor);
-    bolt4->drawSolidCircle(Vec2(0, 0), boltradius, 0, 150, boltColor);
-    bolt1->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0f / 2) - boltradius * FILL, screenSize.height * (1 / FILL + 1.0f / 2) - boltradius * FILL));
-    bolt2->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0f / 2) + boltradius * FILL, screenSize.height * (1 / FILL + 1.0f / 2) - boltradius * FILL));
-    bolt3->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0f / 2) - boltradius * FILL, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltradius * FILL));
-    bolt4->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0f / 2) + boltradius * FILL, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltradius * FILL));
+    bolt1->drawSolidCircle(Vec2(0, 0), boltRadius, 0, 150, boltColor);
+    bolt2->drawSolidCircle(Vec2(0, 0), boltRadius, 0, 150, boltColor);
+    bolt3->drawSolidCircle(Vec2(0, 0), boltRadius, 0, 150, boltColor);
+    bolt4->drawSolidCircle(Vec2(0, 0), boltRadius, 0, 150, boltColor);
+    bolt1->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0f / 2) - boltRadius * FILL, screenSize.height * (1 / FILL + 1.0f / 2) - boltRadius * FILL));
+    bolt2->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0f / 2) + boltRadius * FILL, screenSize.height * (1 / FILL + 1.0f / 2) - boltRadius * FILL));
+    bolt3->setPosition(origin + Vec2(screenSize.width * (1 / FILL + 1.0f / 2) - boltRadius * FILL, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltRadius * FILL));
+    bolt4->setPosition(origin + Vec2(screenSize.width * (-1 / FILL + 1.0f / 2) + boltRadius * FILL, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltRadius * FILL));
     menu->addChild(bolt1);
     menu->addChild(bolt2);
     menu->addChild(bolt3);
     menu->addChild(bolt4);
     auto engrave = Label::createWithTTF("wrecking madness", TEXT_FONT, 12);
-    engrave->setPosition(origin + Vec2(screenSize.width / 2, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltradius * FILL));
+    engrave->setPosition(origin + Vec2(screenSize.width / 2, off + screenSize.height * (-1 / FILL + 1.0f / 2) + boltRadius * FILL));
     engrave->setTextColor(Common::BoltColorDark);
     menu->addChild(engrave);
 
@@ -545,23 +458,17 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int topScore) {
     auto btnRestart = MenuItemImage::create(SPRITE_BUTTON_RESTART_NORMAL, SPRITE_BUTTON_RESTART_PRESSED);
     auto btnShare = MenuItemImage::create(SPRITE_BUTTON_SHARE_NORMAL, SPRITE_BUTTON_SHARE_PRESSED);
     btnExit->setCallback(std::bind(&Common::enterMainMenuScene));
-    btnShare->setCallback(CC_CALLBACK_0(GameScene::shareScore, this));
+    btnShare->setCallback(std::bind(&GameScene::shareScore));
     btnRestart->setCallback(std::bind(&GameScene::restartGame));
 
-    auto buttons = Vector<MenuItem*>{ btnRestart, btnShare };
-#if (SDKBOX_ENABLED && SDKBOX_FACEBOOK)
-    auto btnFacebook = MenuItemImage::create("mb_fb_n.png", "mb_fb_p.png");
-    btnFacebook->setName(BUTTON_FACEBOOK);
-    buttons.pushBack(btnFacebook);
-#endif
-    buttons.pushBack(btnExit);
-    auto bt_menu = Menu::createWithArray(buttons);
-    bt_menu->alignItemsHorizontally();
-    bt_menu->setAnchorPoint(Vec2(0, 0.5));
-    bt_menu->setPosition(origin + Vec2(
+    auto buttons = Vector<MenuItem*>{ btnRestart, btnShare, btnExit };
+    auto buttonsMenu = Menu::createWithArray(buttons);
+    buttonsMenu->setAnchorPoint(Vec2(0, 0.5));
+    buttonsMenu->setPosition(origin + Vec2(
         screenSize.width / 2,
-        screenSize.height * (1.0f / 2 - 1 / FILL) + border * 4));
-    menu->addChild(bt_menu);
+        screenSize.height * (0.5f - 1 / FILL) + border * 4));
+    menu->addChild(buttonsMenu);
+    buttonsMenu->alignItemsHorizontally();
 
     return menu;
 }
