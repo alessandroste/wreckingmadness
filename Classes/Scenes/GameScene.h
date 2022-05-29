@@ -9,8 +9,8 @@
 
 namespace wreckingmadness {
     enum Direction {
-        LEFT,
-        RIGHT
+        LEFT = -1,
+        RIGHT = 1
     };
 
     class GameScene : public cocos2d::LayerColor {

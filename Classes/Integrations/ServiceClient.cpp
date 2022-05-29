@@ -30,6 +30,7 @@ void ServiceClient::getNewPlayerId(
     request->setResponseCallback(std::bind(&ServiceClient::handleResponse, this, std::placeholders::_1, std::placeholders::_2));
     setDefaultHeaders(*request);
     request->setTag(SERVICE_ENDPOINT_GETPLAYERID);
+    CCLOG("[ServiceClient] Sending player id request");
     httpClient->send(request);
     request->release();
 }
@@ -55,7 +56,7 @@ void ServiceClient::sendScore(
     Writer<StringBuffer> writer(stringBuffer);
     data.Accept(writer);
     std::string dataString(stringBuffer.GetString());
-    CCLOG("[ServiceClient] Sending request with body: %s", dataString.c_str());
+    CCLOG("[ServiceClient] Sending score with body: %s", dataString.c_str());
     request->setRequestData(dataString.c_str(), dataString.length());
     request->setTag(SERVICE_ENDPOINT_UPDATESCORE);
     httpClient->send(request);

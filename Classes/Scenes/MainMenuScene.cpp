@@ -32,16 +32,16 @@ bool MainMenuScene::init() {
     viewSize = Director::getInstance()->getVisibleSize();
 
     // menu entries
-    auto lbl_start = Label::createWithTTF("START", TEXT_FONT, TEXT_SIZE_START);
-    lbl_start->enableOutline(Color4B(0, 0, 0, 255), 2);
-    auto btn_start = MenuItemLabel::create(lbl_start, std::bind(&MainMenuScene::startGame));
-    auto lbl_settings = Label::createWithTTF("SETTINGS", TEXT_FONT, TEXT_SIZE_DEFAULT);
-    lbl_settings->enableOutline(Color4B(0, 0, 0, 255), 2);
-    auto btn_settings = MenuItemLabel::create(lbl_settings, std::bind(&MainMenuScene::menuSettingsCallback));
-    auto lbl_exit = Label::createWithTTF("EXIT", TEXT_FONT, TEXT_SIZE_DEFAULT);
-    lbl_exit->enableOutline(Color4B(0, 0, 0, 255), 2);
-    auto btn_exit = MenuItemLabel::create(lbl_exit, std::bind(&MainMenuScene::menuCloseCallback));
-    auto menu = Menu::createWithArray({ btn_start, btn_settings, btn_exit });
+    auto labelStart = Label::createWithTTF("START", TEXT_FONT, TEXT_SIZE_START);
+    labelStart->enableOutline(Color4B(0, 0, 0, 255), 2);
+    auto buttonStart = MenuItemLabel::create(labelStart, std::bind(&MainMenuScene::startGame));
+    auto labelSettings = Label::createWithTTF("SETTINGS", TEXT_FONT, TEXT_SIZE_DEFAULT);
+    labelSettings->enableOutline(Color4B(0, 0, 0, 255), 2);
+    auto buttonSettings = MenuItemLabel::create(labelSettings, std::bind(&MainMenuScene::menuSettingsCallback));
+    auto labelExit = Label::createWithTTF("EXIT", TEXT_FONT, TEXT_SIZE_DEFAULT);
+    labelExit->enableOutline(Color4B(0, 0, 0, 255), 2);
+    auto buttonExit = MenuItemLabel::create(labelExit, std::bind(&MainMenuScene::menuCloseCallback));
+    auto menu = Menu::createWithArray({ buttonStart, buttonSettings, buttonExit });
     menu->alignItemsVertically();
 
     // add menu
@@ -49,14 +49,14 @@ bool MainMenuScene::init() {
     addChild(menu, 2);
 
     // add logo
-    Sprite* logo = Sprite::create(SPRITE_NAME_LOGO);
+    auto logo = Sprite::create(SPRITE_NAME_LOGO);
     logo->setPosition(vOrigin + Vec2(viewSize.width / 2, viewSize.height * 2 / 3));
     logo->setScale(viewSize.width / logo->getContentSize().width);
     addChild(logo, 2);
 
     // add ball
-    this->ball = new Ball(5);
-    ballSprite = this->ball->getNode();
+    ball = new Ball(5);
+    ballSprite = ball->getNode();
     ballSprite->setPosition(vOrigin + Vec2(viewSize.width / 2, viewSize.height));
     ballSprite->setRotation(-BALL_ANGLE / 2.0f);
     deltatime = 0;

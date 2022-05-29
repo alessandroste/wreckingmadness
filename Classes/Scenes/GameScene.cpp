@@ -3,8 +3,6 @@
 #include <iomanip>
 #include <sstream>
 
-#include "ui/UIEditBox/UIEditBox.h"
-#include "ui/UIImageView.h"
 #include "../Integrations/SdkBoxHelper.h"
 #include "GameScene.h"
 #include "Common.h"
@@ -112,7 +110,7 @@ bool GameScene::init() {
     // difficulty
     currentSpeed = MIN_VELOCITY;
     speedSetPoint = currentSpeed;
-    
+
     return true;
 }
 
@@ -185,24 +183,26 @@ void GameScene::checkTouch(int num) {
 void GameScene::update(float dt) {
     int num = skyscraper->getNumber();
     if (num != 0) {
-        float upper_position = skyscraper->getUpperFloor()->getSprite()->getPositionY();
-        float fl_height = skyscraper->getUpperFloor()->getSprite()->getBoundingBox().size.height;
-        if (upper_position > visibleSize.height - fl_height / 2 + visibleOrigin.y) {
+        float upperFloorPositionY = skyscraper->getUpperFloor()->getSprite()->getPositionY();
+        float floorHeight = skyscraper->getUpperFloor()->getSprite()->getBoundingBox().size.height;
+        if (upperFloorPositionY > visibleSize.height - floorHeight / 2 + visibleOrigin.y) {
             // player loses game
             end = true;
             ball->getNode()->removeFromParent();
             endGame();
-        } else if (!end) {
+        }
+        else if (!end) {
             if (currentSpeed < speedSetPoint)
                 currentSpeed += VEL_STEP;
             for (int i = 0; i < num; i++) {
-                float y = skyscraper->getNFloor(i)->getSprite()->getPositionY() + currentSpeed * dt;
+                auto y = skyscraper->getNFloor(i)->getSprite()->getPositionY() + currentSpeed * dt;
                 skyscraper->getNFloor(i)->getSprite()->setPositionY(y);
             }
-            if (skyscraper->getLowerFloor()->getSprite()->getPositionY() > visibleOrigin.y - fl_height)
+            if (skyscraper->getLowerFloor()->getSprite()->getPositionY() > visibleOrigin.y - floorHeight)
                 generateFloor(false, 0);
         }
     }
+
     checkTouch(num);
 }
 
@@ -215,13 +215,24 @@ void GameScene::screenCapturedCallback(bool succeed, const std::string& outputFi
         Director::getInstance()->resume();
     }
     else {
-        Utilities::makeToast("Error encountered while doing screenshot", ToastDuration::SHORT);
+        Utilities::makeToast("Error encountered while taking screenshot", ToastDuration::SHORT);
     }
 }
 
 void GameScene::shareScore() {
     SdkBoxHelper::CloseAd(AdType::GAMEOVER);
-    utils::captureScreen(std::bind(&GameScene::screenCapturedCallback, std::placeholders::_1, std::placeholders::_2), SCREEN_FILE);
+
+    // using utils - suffers from frame size issues
+    // utils::captureScreen(std::bind(&GameScene::screenCapturedCallback, std::placeholders::_1, std::placeholders::_2), SCREEN_FILE);
+
+    auto visibleSize = Director::getInstance()->getWinSize();
+    auto renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height, PixelFormat::RGB888);
+    renderTexture->begin();
+    Director::getInstance()->getRunningScene()->visit();
+    renderTexture->end();
+    renderTexture->saveToFile(SCREEN_FILE, Image::Format::PNG, false, [](RenderTexture* texture, const std::string& fileName) {
+        GameScene::screenCapturedCallback(true, fileName);
+        });
 }
 
 void GameScene::spanCloud(bool random) {
@@ -288,8 +299,9 @@ void GameScene::percentileReceivedCallback(float percentage) {
     CCLOG("[GameScene] Percentage received %f", percentage);
     if (endGameMenu != nullptr && endGameMenu->getChildByName(NODE_SPINNER_NAME) != nullptr) {
         endGameMenu->getChildByName(NODE_SPINNER_NAME)->removeFromParent();
-        auto message = Utilities::formatString("Better than %.2f%% of players", percentage);
-        auto finalScoreLabel = Label::createWithTTF(message, TEXT_FONT, TEXT_SIZE_DEFAULT, Size::ZERO, TextHAlignment::CENTER);
+        auto message = Utilities::formatString("Better than\n %.2f%% \nof players", percentage);
+        auto labelSize = Size(endGameMenu->getBoundingBox().size.width, 0);
+        auto finalScoreLabel = Label::createWithTTF(message, TEXT_FONT, TEXT_SIZE_SMALL, labelSize, TextHAlignment::CENTER);
         finalScoreLabel->setMaxLineWidth(endGameMenu->getBoundingBox().size.width);
         finalScoreLabel->setTextColor(Common::ScorePercentageTextColor);
         finalScoreLabel->setPosition(visibleOrigin + Vec2(visibleSize.width / 2, visibleSize.height / 1.4f));
@@ -305,7 +317,7 @@ void GameScene::generateFloor(bool roof, float correction) {
         auto maxFloorScale = maxFloorWidth / floor->getSprite()->getContentSize().width;
         floor->getSprite()->setScale(maxFloorScale);
     }
-    
+
     floorWidth = floor->getSprite()->getBoundingBox().size.width;
     auto spriteHeight = floor->getSprite()->getBoundingBox().size.height;
     floor->getSprite()->setPosition((Vec2(visibleOrigin.x + visibleSize.width / 2, y - spriteHeight + correction)));
@@ -317,10 +329,11 @@ void GameScene::removeTop(int dir) {
     if (!end) {
         // this space has to be the same also for floor
         auto space = visibleSize.width + floorWidth;
-        skyscraper->getUpperFloor()->getSprite()->runAction(Sequence::create(
-            MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
-            RemoveSelf::create(),
-            nullptr));
+        skyscraper->getUpperFloor()->getSprite()->runAction(
+            Sequence::create(
+                MoveBy::create(space / BREAK_SPEED, Vec2(dir * space, 0)),
+                RemoveSelf::create(),
+                nullptr));
 
         // remove floor from data structure and update currentScore
         skyscraper->removeFloor();
@@ -336,11 +349,7 @@ void GameScene::removeTop(int dir) {
 }
 
 bool GameScene::updateTop(Direction direction) {
-    int sign = 0;
-    if (direction == Direction::RIGHT)
-        sign = 1;
-    if (direction == Direction::LEFT)
-        sign = -1;
+    int sign = direction == Direction::RIGHT ? 1 : -1;
     switch (skyscraper->getUpperFloor()->getFloorStatus()) {
     case BROKEN:
         {
@@ -375,26 +384,26 @@ Node* GameScene::buildEndGameMenu(unsigned int score, int topScore) {
     menu->addChild(rectNode);
 
     // drawing light stripes
-    auto stripewidth = 80.0f;
-    auto stripedist = 25.0f;
+    auto stripeWidth = 60.0f;
+    auto stripeDistance = 20.0f;
     auto stripes = DrawNode::create();
-    stripes->drawTriangle(Vec2(0, 0), Vec2(-stripewidth, 0), Vec2(0, stripewidth), metalColorLight);
+    stripes->drawTriangle(Vec2(0, 0), Vec2(-stripeWidth, 0), Vec2(0, stripeWidth), metalColorLight);
     Vec2 stripe1[4] = {
-        Vec2(-stripewidth - stripedist,0),
-        Vec2(0, stripewidth + stripedist),
-        Vec2(0, stripewidth * 2 + stripedist),
-        Vec2(-stripewidth * 2 - stripedist, 0)
+        Vec2(-stripeWidth - stripeDistance, 0),
+        Vec2(0, stripeWidth + stripeDistance),
+        Vec2(0, stripeWidth * 2 + stripeDistance),
+        Vec2(-stripeWidth * 2 - stripeDistance, 0)
     };
     stripes->drawPolygon(stripe1, 4, metalColorLight, 0, Color4F::BLACK);
     Vec2 stripe2[4] = {
-        Vec2(-stripewidth * 2 - stripedist * 2,0),
-        Vec2(0, stripewidth * 2 + stripedist * 2),
-        Vec2(0, stripewidth * 2.8f + stripedist * 2),
-        Vec2(-stripewidth * 2.8f - stripedist * 2, 0)
+        Vec2(-stripeWidth * 2 - stripeDistance * 2, 0),
+        Vec2(0, stripeWidth * 2 + stripeDistance * 2),
+        Vec2(0, stripeWidth * 2.8f + stripeDistance * 2),
+        Vec2(-stripeWidth * 2.8f - stripeDistance * 2, 0)
     };
     stripes->drawPolygon(stripe2, 4, metalColorLight, 0, Color4F::BLACK);
     stripes->setPosition(origin +
-        Vec2(screenSize.width * (1 / FILL + 1.0f / 2), off + screenSize.height * (-1 / FILL + 1.0f / 2)));
+        Vec2(screenSize.width * (1 / FILL + 0.5f), off + screenSize.height * (-1 / FILL + 0.5f)));
     menu->addChild(stripes);
 
     // drawing bolts
