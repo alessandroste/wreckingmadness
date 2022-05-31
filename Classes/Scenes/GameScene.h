@@ -49,7 +49,7 @@ namespace wreckingmadness {
         void checkTouch(int num);
 
         // building modification
-        void generateFloor(bool roof, float correction);
+        void generateFloor(bool roof);
         void removeTop(int dir);
         bool updateTop(Direction direction);
 
@@ -59,8 +59,7 @@ namespace wreckingmadness {
 
         // game effects
         void spanCloud(bool random);
-        void throwBall(int direction, bool stopped, float height);
-        static void playCrashSound(bool metal);
+        void throwBall(Direction direction, bool stopped, float height);
         void percentileReceivedCallback(float percentage);
     };
 }

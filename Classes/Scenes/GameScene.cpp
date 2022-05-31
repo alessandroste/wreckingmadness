@@ -58,7 +58,7 @@ bool GameScene::init() {
     skyscraper = new Building();
 
     // first floor
-    generateFloor(true, 0);
+    generateFloor(true);
 
     // clouds
     for (int i = 0; i < CLOUD_NUM; i++) spanCloud(true);
@@ -164,7 +164,7 @@ void GameScene::checkTouch(int num) {
                 updateTop(Direction::LEFT);
             }
             else
-                throwBall(-1, true, skyscraper->getUpperFloor()->getSprite()->getPositionY());
+                throwBall(Direction::LEFT, true, skyscraper->getUpperFloor()->getSprite()->getPositionY());
             isTouchDown = false;
         }
         else if (initialTouchPos[0] - currentTouchPos[0] < -SWIPE_FACTOR) {
@@ -174,7 +174,7 @@ void GameScene::checkTouch(int num) {
                 updateTop(Direction::RIGHT);
             }
             else
-                throwBall(1, true, skyscraper->getUpperFloor()->getSprite()->getPositionY());
+                throwBall(Direction::RIGHT, true, skyscraper->getUpperFloor()->getSprite()->getPositionY());
             isTouchDown = false;
         }
     }
@@ -199,7 +199,7 @@ void GameScene::update(float dt) {
                 skyscraper->getNFloor(i)->getSprite()->setPositionY(y);
             }
             if (skyscraper->getLowerFloor()->getSprite()->getPositionY() > visibleOrigin.y - floorHeight)
-                generateFloor(false, 0);
+                generateFloor(false);
         }
     }
 
@@ -254,13 +254,13 @@ void GameScene::spanCloud(bool random) {
         nullptr));
 }
 
-void GameScene::throwBall(int direction = 1, bool stopped = false, float height = 0) {
+void GameScene::throwBall(Direction direction, bool stopped = false, float height = 0) {
     if (!throwing) {
         throwing = true;
         auto ballNode = ball->getNode();
         auto ballRadius = ball->getRadius();
         auto ballLength = ball->getLength();
-        auto xPos = (direction < 0) ?
+        auto xPos = (direction == Direction::LEFT) ?
             visibleOrigin.x + visibleSize.width + ballRadius * scale :
             visibleOrigin.x - ballRadius * scale;
         auto yPos = height + ballLength;
@@ -270,7 +270,7 @@ void GameScene::throwBall(int direction = 1, bool stopped = false, float height 
         if (!stopped) {
             ballNode->runAction(Sequence::create(
                 MoveBy::create(space1 / BREAK_SPEED, Vec2(direction * space1, 0)),
-                CallFunc::create(std::bind(&GameScene::playCrashSound, false)),
+                CallFunc::create(std::bind(&SoundService::playEffect, Effect::HIT)),
                 CallFunc::create(std::bind(&GameScene::removeTop, this, direction)),
                 DelayTime::create(0.02f),
                 MoveBy::create(space / BREAK_SPEED, Vec2(direction * space, 0)),
@@ -280,19 +280,12 @@ void GameScene::throwBall(int direction = 1, bool stopped = false, float height 
         else {
             ballNode->runAction(Sequence::create(
                 MoveBy::create(0.05f, Vec2(direction * space1, 0)),
-                CallFunc::create(std::bind(&GameScene::playCrashSound, true)),
+                CallFunc::create(std::bind(&SoundService::playEffect, Effect::METAL_HIT)),
                 MoveBy::create(0.2f, Vec2(-direction * space1, 0)),
                 CallFunc::create(std::bind([this] { throwing = false; })),
                 nullptr));
         }
     }
-}
-
-void GameScene::playCrashSound(bool metal = false) {
-    if (!metal)
-        SoundService::playEffect(Effect::HIT);
-    else
-        SoundService::playEffect(Effect::METAL_HIT);
 }
 
 void GameScene::percentileReceivedCallback(float percentage) {
@@ -309,18 +302,23 @@ void GameScene::percentileReceivedCallback(float percentage) {
     }
 }
 
-void GameScene::generateFloor(bool roof, float correction) {
+void GameScene::generateFloor(bool roof) {
     auto y = roof ? visibleOrigin.y : skyscraper->getLowerFloor()->getSprite()->getPositionY();
     auto floor = new Floor(FloorStatus::BROKEN, roof ? FloorType::ROOF : Floor::getRandomFloorType());
-    if (floor->getSprite()->getContentSize().width > FILL_FACTOR * visibleSize.width) {
-        auto maxFloorWidth = FILL_FACTOR * visibleSize.width;
-        auto maxFloorScale = maxFloorWidth / floor->getSprite()->getContentSize().width;
-        floor->getSprite()->setScale(maxFloorScale);
-    }
+    // if (floor->getSprite()->getContentSize().width > FILL_FACTOR * visibleSize.width) {
+    //     auto maxFloorWidth = FILL_FACTOR * visibleSize.width;
+    //     auto maxFloorScale = maxFloorWidth / floor->getSprite()->getContentSize().width;
+    //     floor->getSprite()->setScale(maxFloorScale);
+    // }
 
     floorWidth = floor->getSprite()->getBoundingBox().size.width;
     auto spriteHeight = floor->getSprite()->getBoundingBox().size.height;
-    floor->getSprite()->setPosition((Vec2(visibleOrigin.x + visibleSize.width / 2, y - spriteHeight + correction)));
+    floor->getSprite()->setPosition(Vec2(visibleOrigin.x + visibleSize.width / 2, y - spriteHeight));
+    // floor->getSprite()->runAction(
+    //     RepeatForever::create(
+    //         MoveBy::create(5.0, Vec2(0, visibleSize.height * 2))
+    //     )
+    // );
     addChild(floor->getSprite(), 3);
     skyscraper->addFloor(floor);
 }
@@ -355,7 +353,7 @@ bool GameScene::updateTop(Direction direction) {
         {
             auto y = skyscraper->getUpperFloor()->getSprite()->getPositionY() +
                 skyscraper->getUpperFloor()->getSprite()->getContentSize().height / 2;
-            throwBall(sign, false, y);
+            throwBall(direction, false, y);
             return true;
         }
     default:
