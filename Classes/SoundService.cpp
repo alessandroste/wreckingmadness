@@ -10,6 +10,17 @@
 using namespace cocos2d;
 using namespace wreckingmadness;
 
+SoundService* SoundService::instance = nullptr;
+
+SoundService* SoundService::getInstance() {
+    if (instance == nullptr) {
+        instance = new SoundService();
+        instance->backgroundAudioId = cocos2d::AudioEngine::INVALID_AUDIO_ID;
+    }
+
+    return instance;
+};
+
 void SoundService::preloadEffects() {
     CCLOG("[SoundService] Preloading effects");
 #ifdef USE_AUDIOENGINE
@@ -54,25 +65,56 @@ void SoundService::playEffect(Effect effect) {
 void SoundService::playBackgroundMusic() {
     auto isMusicEnabled = UserDefault::getInstance()->getBoolForKey(CONFIG_KEY_MUSIC_ENABLED, true);
 #ifdef USE_AUDIOENGINE
-
+    auto isMusicPlaying = SoundService::getInstance()->backgroundAudioId != AudioEngine::INVALID_AUDIO_ID;
 #else
     auto isMusicPlaying = CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying();
 #endif
-    if (isMusicEnabled && !isMusicPlaying)
+    if (isMusicEnabled && !isMusicPlaying) {
+#ifdef USE_AUDIOENGINE
+        auto newAudioId = AudioEngine::play2d(MUSIC_BACKGROUND, true);
+        SoundService::getInstance()->backgroundAudioId = newAudioId;
+#else
         CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(MUSIC_BACKGROUND, true);
-    else if (!isMusicEnabled && isMusicPlaying)
+#endif
+    }
+    else if (!isMusicEnabled && isMusicPlaying) {
+#ifdef USE_AUDIOENGINE
+        auto backgroundAudioId = SoundService::getInstance()->backgroundAudioId;
+        if (backgroundAudioId != AudioEngine::INVALID_AUDIO_ID) {
+            AudioEngine::stop(backgroundAudioId);
+            SoundService::getInstance()->backgroundAudioId = AudioEngine::INVALID_AUDIO_ID;
+        }
+#else
         CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic(MUSIC_BACKGROUND);
+#endif
+    }
 }
 
 void SoundService::pauseAll() {
     CCLOG("[SoundService] Pausing all audio");
+#ifdef USE_AUDIOENGINE
+    AudioEngine::pauseAll();
+#else
     CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
     CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+#endif
 }
 
 void SoundService::resumeAll() {
     CCLOG("[SoundService] Resuming all audio");
+#ifdef USE_AUDIOENGINE
+    AudioEngine::resumeAll();
+#else
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
-    if (SoundService::isBackgroundMusicEnabled())
+#endif
+    if (SoundService::isBackgroundMusicEnabled()) {
+#ifdef USE_AUDIOENGINE
+        auto backgroundAudioId = SoundService::getInstance()->backgroundAudioId;
+        if (backgroundAudioId != AudioEngine::INVALID_AUDIO_ID) {
+            AudioEngine::resume(backgroundAudioId);
+        }
+#else
         CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+#endif
+    }
 }

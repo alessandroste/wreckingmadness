@@ -1,6 +1,8 @@
 #ifndef __SOUNDSERVICE_H__
 #define __SOUNDSERVICE_H__
 
+#include "AudioEngine.h"
+
 #define SOUND_HIT "hit.wav"
 #define SOUND_METAL_HIT "metal_hit.wav"
 #define MUSIC_BACKGROUND "wreckingsound.wav"
@@ -16,6 +18,9 @@ namespace wreckingmadness {
 
     class SoundService {
     private:
+        static SoundService* instance;
+        static SoundService* getInstance();
+        int backgroundAudioId;
     public:
         static void preloadEffects();
         static void setBackgroundMusic(bool on);

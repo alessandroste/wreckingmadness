@@ -305,20 +305,9 @@ void GameScene::percentileReceivedCallback(float percentage) {
 void GameScene::generateFloor(bool roof) {
     auto y = roof ? visibleOrigin.y : skyscraper->getLowerFloor()->getSprite()->getPositionY();
     auto floor = new Floor(FloorStatus::BROKEN, roof ? FloorType::ROOF : Floor::getRandomFloorType());
-    // if (floor->getSprite()->getContentSize().width > FILL_FACTOR * visibleSize.width) {
-    //     auto maxFloorWidth = FILL_FACTOR * visibleSize.width;
-    //     auto maxFloorScale = maxFloorWidth / floor->getSprite()->getContentSize().width;
-    //     floor->getSprite()->setScale(maxFloorScale);
-    // }
-
     floorWidth = floor->getSprite()->getBoundingBox().size.width;
     auto spriteHeight = floor->getSprite()->getBoundingBox().size.height;
     floor->getSprite()->setPosition(Vec2(visibleOrigin.x + visibleSize.width / 2, y - spriteHeight));
-    // floor->getSprite()->runAction(
-    //     RepeatForever::create(
-    //         MoveBy::create(5.0, Vec2(0, visibleSize.height * 2))
-    //     )
-    // );
     addChild(floor->getSprite(), 3);
     skyscraper->addFloor(floor);
 }

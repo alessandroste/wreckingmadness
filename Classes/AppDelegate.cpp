@@ -9,10 +9,10 @@
 using namespace cocos2d;
 using namespace wreckingmadness;
 
-static auto designResolutionSize = cocos2d::Size(480, 640);
-static auto smallResolutionSize = cocos2d::Size(480, 640);
-static auto mediumResolutionSize = cocos2d::Size(960, 1280);
-static auto largeResolutionSize = cocos2d::Size(1920, 2560);
+static auto designResolutionSize = cocos2d::Size(480, 720);
+static auto smallResolutionSize = cocos2d::Size(480, 720);
+static auto mediumResolutionSize = cocos2d::Size(960, 1440);
+static auto largeResolutionSize = cocos2d::Size(1920, 2880);
 
 AppDelegate::AppDelegate() {};
 
@@ -44,9 +44,6 @@ bool AppDelegate::applicationDidFinishLaunching() {
 #endif
         director->setOpenGLView(glView);
     }
-
-    // set FPS. the default value is 1.0/60 if you don't call this
-    director->setAnimationInterval(1.0f / 60);
 
     // Set the design resolution
     glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
