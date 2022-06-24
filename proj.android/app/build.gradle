@@ -82,7 +82,7 @@ android {
         }
     }
     
-    ndkVersion '21.1.6352462'
+    ndkVersion '24.0.8215888'
 }
 
 android.applicationVariants.all { variant ->
@@ -104,10 +104,7 @@ android.applicationVariants.all { variant ->
 }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-ads:20.6.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(':libcocos2dx')
-}
-
-dependencies {
-    implementation 'com.google.android.gms:play-services-ads:20.6.0'
 }
