@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowManager;
 
+import androidx.annotation.Keep;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
@@ -59,6 +60,7 @@ public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
         }
     }
     
+    @Keep
     public void shareIntent(String fileName) {
         final String fileProviderAuthority = "com.ales.wreckingmadness.FileProvider";
         final Intent shareIntent = new Intent(Intent.ACTION_SEND);
