@@ -1,8 +1,34 @@
 {
-  "cmake.buildDirectory": "${workspaceFolder}/proj.win32/build",
+  "azureFunctions.deploySubpath": "server\\functions\\bin\\Release\\net6.0\\publish",
+  "azureFunctions.preDeployTask": "Functions - Publish",
   "azureFunctions.projectLanguage": "C#",
   "azureFunctions.projectRuntime": "~4",
   "azureFunctions.projectSubpath": "server\\functions",
-  "azureFunctions.deploySubpath": "server\\functions\\bin\\Release\\net6.0\\publish",
-  "azureFunctions.preDeployTask": "Functions - Publish"
+  "cmake.cmakePath": "${env:ANDROID_SDK_ROOT}\\cmake\\3.22.1\\bin\\cmake.exe",
+  "cmake.environment": {
+    "PATH": "${env:ANDROID_SDK_ROOT}\\cmake\\3.22.1\\bin\\;${env:PATH}"
+  },
+  "cmake.generator": "Ninja",
+  "cmake.configureOnOpen": true,
+  "cmake.options.advanced": {
+    "build": {
+      "statusBarVisibility": "inherit",
+      "inheritDefault": "visible"
+    },
+    "launch": {
+      "statusBarVisibility": "inherit",
+      "inheritDefault": "visible"
+    },
+    "debug": {
+      "statusBarVisibility": "inherit",
+      "inheritDefault": "visible"
+    },
+    "cpack": {
+      "statusBarVisibility": "hidden"
+    },
+    "workflow": {
+      "statusBarVisibility": "hidden"
+    }
+  },
+  "dotnet.defaultSolution": "disable"
 }

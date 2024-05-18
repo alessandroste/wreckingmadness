@@ -4,29 +4,18 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Game (Android) - CMAKE Configure",
-      "type": "shell",
-      "command": "C:\\msys64\\mingw64\\bin\\cmake.exe",
-      "args": [
-        "--toolchain",
-        "C:\\Program Files (x86)\\Android\\android-sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
-        "-DANDROID_ABI=x86",
-        "-DANDROID_PLATFORM=android-16",
-        "-B",
-        "proj.android/build"
-      ]
-    },
-    {
       "label": "Game (Android) - Build",
       "type": "shell",
-      "command": ".\\gradlew",
+      "command": "./gradlew",
       "options": {
-        "cwd": "proj.android"
+        "cwd": "${workspaceFolder}/proj.android"
       },
       "args": [
         "bundle"
       ],
-      "problemMatcher": [],
+      "problemMatcher": [
+        "$gradle"
+      ],
       "group": {
         "kind": "build"
       }
@@ -34,14 +23,16 @@
     {
       "label": "Game (Android) - Install",
       "type": "shell",
-      "command": ".\\gradlew",
+      "command": "./gradlew",
       "options": {
-        "cwd": "proj.android"
+        "cwd": "${workspaceFolder}/proj.android"
       },
       "args": [
         "installDebug"
       ],
-      "problemMatcher": [],
+      "problemMatcher": [
+        "$gradle"
+      ],
       "group": {
         "kind": "build"
       }
@@ -61,7 +52,7 @@
       },
       "args": [
         "-avd",
-        "Android_Emulator_31",
+        "A34",
         "-gpu",
         "on"
       ],

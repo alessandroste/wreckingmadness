@@ -4,10 +4,16 @@
     "dockerfile": "Dockerfile",
     "args": {}
   },
-  "settings": {},
-  "extensions": [],
   "mounts": [],
   "forwardPorts": [],
   // Replace when using a ptrace-based debugger like C++, Go, and Rust
-  // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ]
+  // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+  "runArgs": [
+    "--userns=keep-id:uid=1000,gid=1000"
+  ],
+  "containerUser": "vscode",
+  "updateRemoteUserUID": true,
+  "containerEnv": {
+    "HOME": "/home/vscode"
+  }
 }

@@ -1,17 +1,17 @@
-FROM mcr.microsoft.com/vscode/devcontainers/base:alpine
+FROM mcr.microsoft.com/vscode/devcontainers/base:debian
 
-RUN apk -U update && apk -U add \
-    python2 \
+RUN apt update -y && apt install -y \
+    python3 \
     git \ 
     gcc \
     g++ \
     make \
     cmake \
-    fontconfig-dev \
-    gtk+3.0-dev \
-    glew-dev \
-    curl-dev \
-    sqlite-dev
+    libfontconfig1-dev \
+    libgtk-3-dev \
+    libglew-dev \
+    libcurl4-gnutls-dev \
+    libsqlite3-dev
 
 # Android
 ENV ANDROID_HOME      /opt/android-sdk-linux
@@ -27,10 +27,10 @@ ENV PATH "${PATH}:${ANDROID_HOME}/platform-tools"
 ENV PATH "${PATH}:${ANDROID_HOME}/emulator"
 ENV PATH "${PATH}:${ANDROID_HOME}/bin"
 
-RUN apk -U update && apk -U add \
+RUN apt install -y \
     wget \
     unzip \
-    openjdk11 \
+    openjdk-17-jdk-headless \
     cmake
 
 RUN \
@@ -46,5 +46,10 @@ RUN \
     sdkmanager \
     "platform-tools" \
     "ndk-bundle" \
-    "build-tools;31.0.0" \
-    "platforms;android-31"
+    "build-tools;34.0.0" \
+    "build-tools;32.0.0" \
+    "ndk;24.0.8215888" \
+    "platforms;android-34"
+
+RUN \
+    chown vscode -R ${ANDROID_HOME}

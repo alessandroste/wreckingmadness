@@ -20,7 +20,9 @@ This is a simple game to learn how to use cocos2d-x library to create cross plat
 # To-do
 - https://github.com/firebase/firebase-cpp-sdk
 
+```
 $ adb shell cat /data/local/tmp/lldb-server | run-as com.ales.wreckingmadness sh -c 'cat > /data/data/com.ales.wreckingmadness/lldb/bin/lldb-server && chmod 700 /data/data/com.ales.wreckingmadness/lldb/bin/lldb-server'
 $ adb shell cat /data/local/tmp/start_lldb_server.sh | run-as com.ales.wreckingmadness sh -c 'cat > /data/data/com.ales.wreckingmadness/lldb/bin/start_lldb_server.sh && chmod 700 /data/data/com.ales.wreckingmadness/lldb/bin/start_lldb_server.sh'
 Starting LLDB server: /data/data/com.ales.wreckingmadness/lldb/bin/start_lldb_server.sh /data/data/com.ales.wreckingmadness/lldb unix-abstract /com.ales.wreckingmadness-0 platform-1650823480768.sock "lldb process:gdb-remote packets"
 Debugger attached to process 9656
+```

@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ales.wreckingmadness"
     android:installLocation="auto">
     <uses-feature android:glEsVersion="0x00020000" />
     <uses-permission android:name="android.permission.INTERNET" />
