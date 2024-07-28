@@ -13,13 +13,17 @@ android {
         compileSdk PROP_TARGET_SDK_VERSION.toInteger()
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
-        versionCode 10
-        versionName "4.0"
+        versionCode 11
+        versionName "5.0"
 
         externalNativeBuild {
             cmake {
                 targets 'wreckingmadness'
-                arguments "-DCMAKE_FIND_ROOT_PATH=", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_STL=c++_static"
+                arguments "-DCMAKE_FIND_ROOT_PATH=",
+                    "-DANDROID_TOOLCHAIN=clang",
+                    "-DANDROID_ARM_NEON=TRUE",
+                    "-DANDROID_STL=c++_static",
+                    "-DUSE_SDKBOX=TRUE"
                 cppFlags "-frtti -fexceptions -fsigned-char"
             }
         }
@@ -36,10 +40,12 @@ android {
         assets.srcDir "../../Resources"
     }
 
+    ndkVersion '27.0.12077973'
+
     externalNativeBuild {
         cmake {
             path "../../CMakeLists.txt"
-            version "3.18.1"
+            version "3.22.1"
         }
     }
     
@@ -86,11 +92,9 @@ android {
             }
         }
     }
-
-    ndkVersion '24.0.8215888'
 }
 
-android.applicationVariants.all { variant ->
+android.applicationVariants.configureEach { variant ->
     def dest_assets_folder = "${projectDir}/assets"
 
     // delete previous files first
@@ -100,16 +104,19 @@ android.applicationVariants.all { variant ->
     
     tasks.register(copyTaskName) {
         copy {
-            from "${buildDir}/../../../Resources"
-            into "${buildDir}/intermediates/assets/${variant.dirName}"
+            from layout.projectDirectory.dir("../Resources")
+            into layout.buildDirectory.dir("intermediate/assets/${variant.dirName}")
             exclude "**/*.gz"
         }
     }
-    tasks.getByName("pre${targetName}Build").dependsOn copyTaskName
+    
+    tasks.named("pre${targetName}Build").configure {
+        dependsOn copyTaskName
+    }
 }
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-ads:20.6.0'
+    implementation 'com.google.android.gms:play-services-ads:23.2.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(':libcocos2dx')
 }

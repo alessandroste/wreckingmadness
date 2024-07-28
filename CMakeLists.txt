@@ -160,7 +160,10 @@ if(LINUX OR WINDOWS)
     cocos_copy_target_res(${APP_NAME} LINK_TO ${APP_RES_DIR} FOLDERS ${GAME_RES_FOLDER})
 endif()
 
-if(ANDROID)
+set(USE_SDKBOX OFF CACHE BOOL "Use SDKBOX SDK")
+set(USE_FIREBASE OFF CACHE BOOL "Use Firebase SDK")
+
+if(ANDROID AND USE_SDKBOX)
     add_definitions(-DSDKBOX_ENABLED)
     
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/jni/PluginAdMob)
@@ -170,9 +173,6 @@ if(ANDROID)
     target_link_libraries(${APP_NAME} ext_sdkbox)
 endif()
 
-# set(MSVC_RUNTIME_MODE MD)
-# add_subdirectory(firebase_cpp_sdk)
-# target_link_libraries(${APP_NAME} firebase_app firebase_admob)
 if (NOT BUILD_EDITOR_COCOSTUDIO)
     add_definitions(-DUSE_AUDIOENGINE)
 endif()

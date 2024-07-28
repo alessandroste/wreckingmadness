@@ -10,27 +10,6 @@
 using namespace cocos2d;
 using namespace wreckingmadness;
 
-const std::string SdkBoxHelper::Configuration = R"(
-{
-    "android": {
-        "AdMob": {
-            "enabled": true,
-            "test": %s,
-            "appid": "ca-app-pub-5982841410553202~6695136411",
-            "ads": {
-                "gameover": {
-                    "id": "ca-app-pub-5982841410553202\/5078802412",
-                    "type": "banner",
-                    "alignment": "bottom",
-                    "width": 0,
-                    "height": 0
-                }
-            }
-        }
-    }
-}
-)";
-
 std::string SdkBoxHelper::AdTypeString(AdType adType) {
     switch (adType) {
     case AdType::GAMEOVER:
@@ -67,8 +46,6 @@ void SdkBoxHelper::ShowAd(AdType adType) {
 void wreckingmadness::SdkBoxHelper::Init() {
 #ifdef SDKBOX_ENABLED
     CCLOG("[SdkBoxHelper] SdkBox enabled");
-//    auto config = Utilities::formatString(Configuration, true);
-//    sdkbox::setConfig(config);
     sdkbox::PluginAdMob::init();
     sdkbox::PluginAdMob::setGDPR(true);
     sdkbox::PluginAdMob::setListener(new AdListener());
