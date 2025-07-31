@@ -2,6 +2,14 @@
 #include "json/document.h"
 #include "json/prettywriter.h"
 
+#ifndef SERVICE_BASE_URL
+#define SERVICE_BASE_URL "http://localhost:7071/api"
+#endif
+
+#ifndef SERVICE_API_KEY
+#define SERVICE_API_KEY "testKey"
+#endif
+
 using namespace cocos2d;
 using namespace cocos2d::network;
 using namespace rapidjson;
@@ -9,6 +17,8 @@ using namespace wreckingmadness;
 
 ServiceClient::ServiceClient() {
     httpClient = HttpClient::getInstance();
+    httpClient->setTimeoutForConnect(5);
+    httpClient->setTimeoutForRead(5);
 }
 
 ServiceClient::~ServiceClient() {}
@@ -56,7 +66,7 @@ void ServiceClient::sendScore(
     Writer<StringBuffer> writer(stringBuffer);
     data.Accept(writer);
     std::string dataString(stringBuffer.GetString());
-    CCLOG("[ServiceClient] Sending score with body: %s", dataString.c_str());
+    CCLOG("[ServiceClient] Sending score");
     request->setRequestData(dataString.c_str(), dataString.length());
     request->setTag(SERVICE_ENDPOINT_UPDATESCORE);
     httpClient->send(request);
@@ -95,7 +105,7 @@ void ServiceClient::handleResponse(cocos2d::network::HttpClient* client, cocos2d
 }
 
 std::string ServiceClient::getEndpointUrl(const std::string& endpointPath) {
-    std::string path(SERVICE_BASE_URI);
+    std::string path(SERVICE_BASE_URL);
     if (path[path.length() - 1] != '/')
         path.append("/");
     path.append(endpointPath);
@@ -104,23 +114,19 @@ std::string ServiceClient::getEndpointUrl(const std::string& endpointPath) {
 
 void ServiceClient::setDefaultHeaders(HttpRequest& request) {
     auto headers = request.getHeaders();
-    setHeader(headers, SERVICE_AUTH_HEADER, SERVICE_KEY);
+    setHeader(headers, SERVICE_AUTH_HEADER, SERVICE_API_KEY);
     setHeader(headers, SERVICE_CONTENT_TYPE_HEADER, "application/json");
     request.setHeaders(headers);
 }
 
-void ServiceClient::setHeader(std::vector<std::string>& headers, const char* key, const char* value) {
-    std::string keyToFind(key);
-    auto checkFunction = [keyToFind](const std::string& i) {
-        auto pos = i.find(keyToFind);
-        return pos == 0;
-    };
-
-    auto headerPos = std::find_if(headers.begin(), headers.end(), checkFunction);
+void ServiceClient::setHeader(std::vector<std::string>& headers, const std::string& key, const std::string& value) {
+    auto headerPos = std::find_if(headers.begin(), headers.end(), [key](const std::string& i) {
+        return i.find(key) == 0;
+        });
     if (std::end(headers) != headerPos) {
-        *headerPos = keyToFind.append(value);
+        *headerPos = key + ':' + value;
     }
     else {
-        headers.emplace_back(keyToFind.append(value));
+        headers.emplace_back(key + ':' + value);
     }
 }

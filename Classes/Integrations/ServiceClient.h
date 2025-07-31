@@ -4,15 +4,10 @@
 #include "cocos2d.h"
 #include "network\HttpClient.h"
 
-#define SERVICE_BASE_URI "http://localhost:7071/api"
 #define SERVICE_ENDPOINT_GETPLAYERID "GetPlayerId"
 #define SERVICE_ENDPOINT_UPDATESCORE "UpdateScore"
-#define SERVICE_AUTH_HEADER "x-functions-key:"
-#define SERVICE_CONTENT_TYPE_HEADER "Content-Type:"
-
-#ifndef SERVICE_KEY
-#define SERVICE_KEY "testKey"
-#endif
+#define SERVICE_AUTH_HEADER "x-functions-key"
+#define SERVICE_CONTENT_TYPE_HEADER "Content-Type"
 
 typedef std::function<void(std::string&)> GetPlayerIdSuccessCallback;
 typedef std::function<void(float)> ScoreUpdateSuccessCallback;
@@ -33,7 +28,7 @@ namespace wreckingmadness {
 
         static std::string getEndpointUrl(const std::string& endpointPath);
         static void setDefaultHeaders(cocos2d::network::HttpRequest& request);
-        static void setHeader(std::vector<std::string>& headers, const char* key, const char* value);
+        static void setHeader(std::vector<std::string>& headers, const std::string& key, const std::string& value);
     public:
         static ServiceClient& getInstance();
         ~ServiceClient();

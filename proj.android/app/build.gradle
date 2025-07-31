@@ -13,8 +13,8 @@ android {
         compileSdk PROP_TARGET_SDK_VERSION.toInteger()
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
-        versionCode 11
-        versionName "5.0"
+        versionCode 12
+        versionName "5.1"
 
         externalNativeBuild {
             cmake {
@@ -23,24 +23,32 @@ android {
                     "-DANDROID_TOOLCHAIN=clang",
                     "-DANDROID_ARM_NEON=TRUE",
                     "-DANDROID_STL=c++_static",
-                    "-DUSE_SDKBOX=TRUE"
-                cppFlags "-frtti -fexceptions -fsigned-char"
-            }
-        }
+                    "-DANDROID_CPP_FEATURES=exceptions rtti",
+                    "-DUSE_SDKBOX=TRUE",
+                    "-DCMAKE_VERBOSE_MAKEFILE=1"
+                cppFlags "-fsigned-char"
 
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
+                ["SERVICE_API_KEY", "SERVICE_BASE_URL"].forEach {
+                    if (secrets.getProperty(it) != null) {
+                        arguments "-D${it}=${secrets[it]}"
+                    }
+                }
+            }
         }
     }
 
-    sourceSets.main {
-        java.srcDir "src"
-        res.srcDir "res"
-        manifest.srcFile "AndroidManifest.xml"
-        assets.srcDir "../../Resources"
+    sourceSets {
+        main {
+            assets.srcDir "../../Resources"
+        }
     }
 
     ndkVersion '27.0.12077973'
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 
     externalNativeBuild {
         cmake {
@@ -49,69 +57,57 @@ android {
         }
     }
     
-    signingConfigs {
-        release {
-            if (project.hasProperty("RELEASE_STORE_FILE")) {
-                storeFile file(RELEASE_STORE_FILE)
-                storePassword RELEASE_STORE_PASSWORD
-                keyAlias RELEASE_KEY_ALIAS
-                keyPassword RELEASE_KEY_PASSWORD
-            }
+    if (secrets.getProperty("RELEASE_STORE_FILE") != null) {
+        signingConfigs.register("release") {
+            storeFile file(secrets.getProperty("RELEASE_STORE_FILE"))
+            storePassword secrets.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias secrets.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword secrets.getProperty("RELEASE_KEY_PASSWORD")
         }
     }
 
     buildTypes {
         release {
             debuggable false
+            jniDebuggable false
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (project.hasProperty("RELEASE_STORE_FILE")) {
-                signingConfig signingConfigs.release
-            }
-
-            if (secrets.hasProperty("SERVICE_KEY")) {
-                externalNativeBuild {
-                    cmake {
-                        cppFlags.addAll(["-DSERVICE_KEY="+secrets["SERVICE_KEY"]])
-                    }
-                }
-            }
-
-            if (secrets.hasProperty("SERVICE_BASE_URI")) {
-                externalNativeBuild {
-                    cmake {
-                        cppFlags.addAll(["-DSERVICE_BASE_URI="+secrets["SERVICE_BASE_URI"]])
-                    }
-                }
+            signingConfig signingConfigs.findByName("release")
+            ndk {
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
             }
         }
         debug {
+            debuggable true
+            jniDebuggable true
+            applicationIdSuffix '.dbg'
+            versionNameSuffix '-dbg'
             ndk {
-                abiFilters  'arm64-v8a', "x86_64"
+                abiFilters  "arm64-v8a", "x86_64"
             }
         }
     }
-}
 
-android.applicationVariants.configureEach { variant ->
-    def dest_assets_folder = "${projectDir}/assets"
+    applicationVariants.configureEach { variant ->
+        def dest_assets_folder = "${projectDir}/assets"
 
-    // delete previous files first
-    delete dest_assets_folder
-    def targetName = variant.name.capitalize()
-    def copyTaskName = "copy${targetName}ResourcesToAssets"
-    
-    tasks.register(copyTaskName) {
-        copy {
-            from layout.projectDirectory.dir("../Resources")
-            into layout.buildDirectory.dir("intermediate/assets/${variant.dirName}")
-            exclude "**/*.gz"
+        // delete previous files first
+        delete dest_assets_folder
+        def targetName = variant.name.capitalize()
+        def copyTaskName = "copy${targetName}ResourcesToAssets"
+
+        tasks.register(copyTaskName) {
+            copy {
+                from layout.projectDirectory.dir("../Resources")
+                into layout.buildDirectory.dir("intermediate/assets/${variant.dirName}")
+                exclude "**/*.gz"
+            }
         }
-    }
-    
-    tasks.named("pre${targetName}Build").configure {
-        dependsOn copyTaskName
+
+        tasks.named("pre${targetName}Build").configure {
+            dependsOn copyTaskName
+        }
     }
 }
 

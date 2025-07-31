@@ -66,11 +66,11 @@ if(ANDROID)
     # change APP_NAME to the shared library name for Android, its value depend on AndroidManifest.xml
     set(APP_NAME wreckingmadness)
     list(APPEND GAME_SOURCE
-        proj.android/app/jni/wreckingmadness/main.cpp
-        proj.android/app/jni/wreckingmadness/androidPlatform.cpp
+        proj.android/app/src/main/cpp/wreckingmadness/main.cpp
+        proj.android/app/src/main/cpp/wreckingmadness/androidPlatform.cpp
     )
     list(APPEND GAME_HEADER
-        proj.android/app/jni/wreckingmadness/androidPlatform.h
+        proj.android/app/src/main/cpp/wreckingmadness/androidPlatform.h
     )
 elseif(LINUX)
     list(APPEND GAME_SOURCE
@@ -166,10 +166,10 @@ set(USE_FIREBASE OFF CACHE BOOL "Use Firebase SDK")
 if(ANDROID AND USE_SDKBOX)
     add_definitions(-DSDKBOX_ENABLED)
     
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/jni/PluginAdMob)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/src/main/cpp/pluginadmob)
     target_link_libraries(${APP_NAME} ext_PluginAdMob)
 
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/jni/sdkbox)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/src/main/cpp/sdkbox)
     target_link_libraries(${APP_NAME} ext_sdkbox)
 endif()
 
@@ -177,3 +177,8 @@ if (NOT BUILD_EDITOR_COCOSTUDIO)
     add_definitions(-DUSE_AUDIOENGINE)
 endif()
 message("Build shared libs is ${BUILD_SHARED_LIBS}")
+
+set(SERVICE_BASE_URL "http://localhost:7071/api" CACHE STRING "Base URL for the game service API")
+set(SERVICE_API_KEY "" CACHE STRING "API key for the game service")
+add_definitions(-DSERVICE_BASE_URL="${SERVICE_BASE_URL}")
+add_definitions(-DSERVICE_API_KEY="${SERVICE_API_KEY}")

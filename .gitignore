@@ -3,6 +3,8 @@
 **/obj/
 **/*.log
 
+# C++
+.cache
 CMakeCache.txt
 **/CMakeFiles/
 build/

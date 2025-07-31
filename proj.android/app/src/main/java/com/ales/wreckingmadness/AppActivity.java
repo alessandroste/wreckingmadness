@@ -62,17 +62,20 @@ public class AppActivity extends com.sdkbox.plugin.SDKBoxActivity {
     
     @Keep
     public void shareIntent(String fileName) {
-        final String fileProviderAuthority = "com.ales.wreckingmadness.FileProvider";
+        final String fileProviderAuthority = String.format("%s.FileProvider", this.getPackageName());
         final Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("image/jpg");
         final File photoFile = new File(getFilesDir(), fileName);
         final Uri uri = FileProvider.getUriForFile(this, fileProviderAuthority, photoFile);
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        final Intent chooser = Intent.createChooser(shareIntent, "Share image using");
-        final List<ResolveInfo> resInfoList = this.getPackageManager().queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
+        final Intent chooser = Intent.createChooser(shareIntent, getString(R.string.share_title));
+        final List<ResolveInfo> resInfoList = this.getPackageManager()
+            .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
         for (ResolveInfo resolveInfo : resInfoList) {
-            String packageName = resolveInfo.activityInfo.packageName;
-            this.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            this.grantUriPermission(
+                resolveInfo.activityInfo.packageName,
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
         
         startActivity(chooser);

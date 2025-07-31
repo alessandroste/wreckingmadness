@@ -21,10 +21,9 @@
       "name": "Android",
       "includePath": [
         "${workspaceFolder}/**",
-        "${env:ANDROID_SDK_ROOT}/ndk-bundle/sources/cxx-stl/llvm-libc++/include",
-        "${env:ANDROID_SDK_ROOT}/ndk-bundle/sysroot/usr/include"
+        "${env:ANDROID_HOME}/ndk/27.0.12077973/sources/cxx-stl/llvm-libc++/include"
       ],
-      "compilerPath": "${env:ANDROID_SDK_ROOT}/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe",
+      "compilerPath": "${env:ANDROID_HOME}/ndk/27.0.12077973/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe",
       "cStandard": "c17",
       "cppStandard": "c++17",
       "intelliSenseMode": "windows-clang-x64",

@@ -19,7 +19,7 @@
         <activity
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
-            android:name="com.ales.wreckingmadness.AppActivity"
+            android:name=".AppActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
@@ -29,7 +29,7 @@
         </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.ales.wreckingmadness.FileProvider"
+            android:authorities="${applicationId}.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
