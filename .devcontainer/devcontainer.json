@@ -4,16 +4,25 @@
     "dockerfile": "Dockerfile",
     "args": {}
   },
-  "mounts": [],
-  "forwardPorts": [],
-  // Replace when using a ptrace-based debugger like C++, Go, and Rust
-  // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
   "runArgs": [
-    "--userns=keep-id:uid=1000,gid=1000"
+    "--device=/dev/dxg"
   ],
-  "containerUser": "vscode",
-  "updateRemoteUserUID": true,
+  "mounts": [
+    "source=/usr/lib/wsl,target=/usr/lib/wsl,type=bind,readonly",
+    "source=${localWorkspaceFolderBasename}-build,target=${containerWorkspaceFolder}/build,type=volume"
+  ],
+  "postCreateCommand": "sudo chown -R $(id -u):$(id -g) ${containerWorkspaceFolder}/build",
   "containerEnv": {
-    "HOME": "/home/vscode"
+    "LD_LIBRARY_PATH": "/usr/lib/wsl/lib",
+    "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cmake-tools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "nisargjhaveri.android-debug"
+      ]
+    }
   }
 }

@@ -19,3 +19,6 @@ proj.linux/*
 
 # Windows
 proj.win32/build
+
+# IntelliJ / Android Studio
+.idea/

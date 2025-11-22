@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/vscode/devcontainers/base:debian
 
-RUN apt update -y && apt install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt update -y && apt install -y \
     python3 \
     git \ 
     gcc \
@@ -11,7 +11,13 @@ RUN apt update -y && apt install -y \
     libgtk-3-dev \
     libglew-dev \
     libcurl4-gnutls-dev \
-    libsqlite3-dev
+    libsqlite3-dev \
+    wget \
+    unzip \
+    openjdk-21-jdk-headless \
+    cmake \
+    clangd \
+    ccache
 
 # Android
 ENV ANDROID_HOME      /opt/android-sdk-linux
@@ -23,12 +29,6 @@ ENV PATH "${PATH}:${ANDROID_HOME}/platform-tools"
 ENV PATH "${PATH}:${ANDROID_HOME}/emulator"
 ENV PATH "${PATH}:${ANDROID_HOME}/bin"
 
-RUN apt install -y \
-    wget \
-    unzip \
-    openjdk-17-jdk-headless \
-    cmake
-
 RUN \
     mkdir -p ${ANDROID_HOME}/cmdline-tools/latest && \
     mkdir -p /tmp/android-tools/ && \
@@ -37,13 +37,20 @@ RUN \
     mv /tmp/android-tools/cmdline-tools/* ${ANDROID_HOME}/cmdline-tools/latest/ && \
     rm -rf /tmp/android-tools
 
+ARG ANDROID_BUILD_TOOLS_VERSION="36.1.0"
+ARG ANDROID_CMAKE_VERSION="3.31.6"
+ARG ANDROID_NDK_VERSION="29.0.14206865"
+
 RUN \
     yes | sdkmanager --licenses && \
     sdkmanager \
     "platform-tools" \
-    "build-tools;34.0.0" \
-    "ndk;27.0.12077973" \
-    "platforms;android-36"
+    "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+    "ndk;${ANDROID_NDK_VERSION}" \
+    "platforms;android-36" \
+    "cmake;${ANDROID_CMAKE_VERSION}"
 
 RUN \
     chown vscode -R ${ANDROID_HOME}
+
+USER vscode

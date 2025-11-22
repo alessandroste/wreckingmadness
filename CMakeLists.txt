@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # ****************************************************************************/
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 
 set(APP_NAME wreckingmadness)
 
@@ -31,6 +31,10 @@ project(${APP_NAME})
 set(BUILD_EDITOR_COCOSTUDIO OFF CACHE BOOL "" FORCE)
 set(BUILD_EDITOR_SPINE OFF CACHE BOOL "" FORCE)
 set(BUILD_EXTENSIONS OFF CACHE BOOL "" FORCE)
+set(BUILD_LUA_LIBS OFF CACHE BOOL "" FORCE)
+
+option(USE_CCACHE ON)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/CCache)
 
 if(XCODE)
     if(NOT DEFINED CMAKE_XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET)

@@ -10,11 +10,11 @@ android {
     defaultConfig {
         namespace "com.ales.wreckingmadness"
         applicationId "com.ales.wreckingmadness"
-        compileSdk PROP_TARGET_SDK_VERSION.toInteger()
+        compileSdkVersion PROP_TARGET_SDK_VERSION.toInteger()
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
-        versionCode 12
-        versionName "5.1"
+        versionCode 13
+        versionName "5.2"
 
         externalNativeBuild {
             cmake {
@@ -25,7 +25,9 @@ android {
                     "-DANDROID_STL=c++_static",
                     "-DANDROID_CPP_FEATURES=exceptions rtti",
                     "-DUSE_SDKBOX=TRUE",
-                    "-DCMAKE_VERBOSE_MAKEFILE=1"
+                    "-DCMAKE_VERBOSE_MAKEFILE=1",
+                    "-DUSE_CCACHE=OFF",
+                    "-DBUILD_SHARED_LIBS=OFF"
                 cppFlags "-fsigned-char"
 
                 ["SERVICE_API_KEY", "SERVICE_BASE_URL"].forEach {
@@ -43,7 +45,7 @@ android {
         }
     }
 
-    ndkVersion '27.0.12077973'
+    ndkVersion '29.0.14206865'
     
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -53,7 +55,7 @@ android {
     externalNativeBuild {
         cmake {
             path "../../CMakeLists.txt"
-            version "3.22.1"
+            version "3.31.6"
         }
     }
     
